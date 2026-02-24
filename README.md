@@ -1,6 +1,6 @@
 # terraform-aws-eks-baseline-sgs
 
-Zero-trust EKS baseline security groups with SG chaining. Published to TFC private registry.
+Zero-trust EKS baseline security groups with SG chaining. Published to TFE private registry.
 
 ## Overview
 
