@@ -11,7 +11,7 @@ Initial release.
 
 ### Features
 - Zero-trust SG chaining (no CIDR-based cross-SG rules)
-- 6 managed prefix lists (corporate, WAF, VPCE, database, CI/CD, monitoring)
+- 5 managed prefix lists (corporate, WAF, VPCE, CI/CD, monitoring)
 - Cross-account prefix list sharing via RAM
 - VPC auto-discovery or explicit ID
 - Mutually exclusive EKS profile validation
