@@ -83,7 +83,6 @@ output "prefix_lists" {
     waf_saas_providers   = aws_ec2_managed_prefix_list.waf_saas_providers.id
     aws_vpc_endpoints    = aws_ec2_managed_prefix_list.aws_vpc_endpoints.id
     database_subnets     = aws_ec2_managed_prefix_list.database_subnets.id
-    alb_subnets          = aws_ec2_managed_prefix_list.alb_subnets.id
     ci_cd_systems        = aws_ec2_managed_prefix_list.ci_cd_systems.id
     monitoring_services  = aws_ec2_managed_prefix_list.monitoring_services.id
   }

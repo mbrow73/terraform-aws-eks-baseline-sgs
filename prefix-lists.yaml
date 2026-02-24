@@ -111,28 +111,6 @@ prefix_lists:
       Type: "database"
       
   # Application load balancer subnets
-  alb-subnets:
-    name: "alb-subnets"
-    description: "ALB subnet CIDR blocks for ingress rules"
-    max_entries: 30
-    address_family: "IPv4"
-    entries:
-      - cidr: "10.100.1.0/24"
-        description: "Production ALB subnet AZ-1a"
-      - cidr: "10.100.2.0/24"
-        description: "Production ALB subnet AZ-1b"
-      - cidr: "10.100.3.0/24"
-        description: "Production ALB subnet AZ-1c"
-      - cidr: "10.101.1.0/24"
-        description: "Staging ALB subnet AZ-1a"
-      - cidr: "10.101.2.0/24"
-        description: "Staging ALB subnet AZ-1b"
-      - cidr: "10.102.1.0/24"
-        description: "Development ALB subnet AZ-1a"
-    tags:
-      ManagedBy: "sg-platform"
-      Type: "load-balancer"
-      
   # CI/CD and build system IPs
   ci-cd-systems:
     name: "ci-cd-systems"
