@@ -29,6 +29,7 @@ module "baseline_sgs" {
 
   account_id        = "111222333444"
   vpc_id            = module.vpc.vpc_id
+  environment       = "prod"
   baseline_profiles = ["eks-standard"]
 
   tags = {
@@ -62,6 +63,7 @@ module "baseline_sgs" {
 
   account_id        = "555666777888"
   vpc_id            = module.vpc.vpc_id
+  environment       = "prod"
   baseline_profiles = ["eks-internet"]
 
   tags = {
@@ -102,6 +104,7 @@ module "baseline_sgs" {
 
   account_id        = "999000111222"
   vpc_id            = module.vpc.vpc_id
+  environment       = "prod"
   baseline_profiles = ["vpc-endpoints"]
 
   tags = {
@@ -129,6 +132,7 @@ module "baseline_sgs" {
 
   account_id        = var.account_id
   vpc_id            = module.vpc.vpc_id
+  environment       = var.environment
   baseline_profiles = ["eks-standard"]
 
   tags = {
@@ -158,6 +162,7 @@ module "baseline_sgs" {
 
   account_id        = var.account_id
   vpc_id            = module.vpc.vpc_id
+  environment       = var.environment
   baseline_profiles = ["eks-internet"]
 
   tags = {
@@ -188,6 +193,7 @@ module "baseline_sgs" {
 
   account_id        = var.account_id
   vpc_id            = module.vpc.vpc_id
+  environment       = var.environment
   baseline_profiles = ["vpc-endpoints"]
 
   tags = {
@@ -215,6 +221,7 @@ module "baseline_sgs" {
 
   account_id        = "111222333444"
   vpc_id            = module.vpc.vpc_id
+  environment       = "prod"
   baseline_profiles = ["eks-standard"]
 
   share_prefix_lists_with_accounts = [
@@ -232,7 +239,8 @@ module "baseline_sgs" {
 | `vpc_id` | VPC ID or `"auto"` for discovery | `string` | `"auto"` | no |
 | `region` | AWS region (for prefix list overrides) | `string` | `"us-east-1"` | no |
 | `baseline_profiles` | Profiles to deploy | `list(string)` | `[]` | yes |
-| `tags` | Additional tags for all resources | `map(string)` | `{}` | no |
+| `environment` | Environment name for `<company>-app-env` tag | `string` | — | yes |
+| `tags` | Additional tags (corporate mandatory tags are auto-included) | `map(string)` | `{}` | no |
 | `share_prefix_lists_with_accounts` | Account IDs for RAM prefix list sharing | `list(string)` | `[]` | no |
 
 ## Outputs

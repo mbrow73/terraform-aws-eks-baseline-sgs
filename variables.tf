@@ -43,8 +43,13 @@ variable "baseline_profiles" {
   }
 }
 
+variable "environment" {
+  description = "Environment name for the <company>-app-env corporate mandatory tag (e.g. dev, staging, prod)"
+  type        = string
+}
+
 variable "tags" {
-  description = "Additional tags to apply to all resources"
+  description = "Additional tags to apply to all resources. Corporate mandatory tags are automatically included — you do not need to pass them here."
   type        = map(string)
   default     = {}
 }
