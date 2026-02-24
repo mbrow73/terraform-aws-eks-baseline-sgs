@@ -71,44 +71,6 @@ resource "aws_ec2_managed_prefix_list" "aws_vpc_endpoints" {
   })
 }
 
-# Database Subnets
-resource "aws_ec2_managed_prefix_list" "database_subnets" {
-  name           = local.prefix_lists.database-subnets.name
-  address_family = local.prefix_lists.database-subnets.address_family
-  max_entries    = local.prefix_lists.database-subnets.max_entries
-
-  dynamic "entry" {
-    for_each = local.prefix_lists.database-subnets.entries
-    content {
-      cidr        = entry.value.cidr
-      description = entry.value.description
-    }
-  }
-
-  tags = merge(local.common_tags, local.prefix_lists.database-subnets.tags, {
-    Name = local.prefix_lists.database-subnets.name
-  })
-}
-
-# ALB Subnets
-resource "aws_ec2_managed_prefix_list" "alb_subnets" {
-  name           = local.prefix_lists.alb-subnets.name
-  address_family = local.prefix_lists.alb-subnets.address_family
-  max_entries    = local.prefix_lists.alb-subnets.max_entries
-
-  dynamic "entry" {
-    for_each = local.prefix_lists.alb-subnets.entries
-    content {
-      cidr        = entry.value.cidr
-      description = entry.value.description
-    }
-  }
-
-  tags = merge(local.common_tags, local.prefix_lists.alb-subnets.tags, {
-    Name = local.prefix_lists.alb-subnets.name
-  })
-}
-
 # CI/CD Systems
 resource "aws_ec2_managed_prefix_list" "ci_cd_systems" {
   name           = local.prefix_lists.ci-cd-systems.name
@@ -164,8 +126,6 @@ resource "aws_ram_resource_association" "prefix_lists" {
     corporate_networks  = aws_ec2_managed_prefix_list.corporate_networks.arn
     waf_saas_providers  = aws_ec2_managed_prefix_list.waf_saas_providers.arn
     aws_vpc_endpoints   = aws_ec2_managed_prefix_list.aws_vpc_endpoints.arn
-    database_subnets    = aws_ec2_managed_prefix_list.database_subnets.arn
-    alb_subnets         = aws_ec2_managed_prefix_list.alb_subnets.arn
     ci_cd_systems       = aws_ec2_managed_prefix_list.ci_cd_systems.arn
     monitoring_services = aws_ec2_managed_prefix_list.monitoring_services.arn
   } : {}
