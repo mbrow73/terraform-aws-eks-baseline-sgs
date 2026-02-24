@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Removed
+- HTTP/80 ingress rule from `vpc-endpoints` security group — S3 gateway endpoints are route-table based and don't use security groups; S3 interface endpoints only need HTTPS/443
+
 ## v1.0.0
 
 Initial release.

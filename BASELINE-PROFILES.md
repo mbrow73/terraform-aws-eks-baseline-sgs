@@ -2,7 +2,7 @@
 
 ## eks-standard (Intranet Only)
 
-> 5 security groups, 38 rules. Zero `0.0.0.0/0`. All cross-SG traffic uses security group references.
+> 5 security groups, 37 rules. Zero `0.0.0.0/0`. All cross-SG traffic uses security group references.
 
 ### Security Groups
 
@@ -21,7 +21,6 @@
 | Direction | Port | Protocol | Source / Destination | Description |
 |---|---|---|---|---|
 | ingress | 443 | tcp | VPC CIDR | HTTPS to interface endpoints |
-| ingress | 80 | tcp | VPC CIDR | HTTP for S3 gateway endpoint |
 
 #### baseline-eks-cluster
 
@@ -83,7 +82,7 @@
 
 ## eks-internet (Internet + Intranet)
 
-> 7 security groups, ~58 rules. Zero `0.0.0.0/0`. Client IP preservation ON — istio sees WAF NAT IPs, not NLB IPs.
+> 7 security groups, ~57 rules. Zero `0.0.0.0/0`. Client IP preservation ON — istio sees WAF NAT IPs, not NLB IPs.
 >
 > **Traffic flow:** WAF NAT IPs → IGW → GWLBe (transparent) → Internet NLB → Istio inet → Workers
 >
@@ -108,7 +107,6 @@
 | Direction | Port | Protocol | Source / Destination | Description |
 |---|---|---|---|---|
 | ingress | 443 | tcp | VPC CIDR | HTTPS to interface endpoints |
-| ingress | 80 | tcp | VPC CIDR | HTTP for S3 gateway endpoint |
 
 #### baseline-eks-cluster
 

@@ -1,7 +1,7 @@
 # AWS Security Group Platform - VPC Endpoints Profile
 #
 # Single security group for all VPC interface endpoints.
-# Ingress from local VPC CIDR on 443 (and 80 for S3 gateway).
+# Ingress from local VPC CIDR on 443 for all interface endpoints.
 # No egress — endpoint ENIs respond to requests, they don't initiate.
 #
 # Risk acceptance: All resources in the VPC can reach all endpoints.
@@ -41,12 +41,3 @@ resource "aws_vpc_security_group_ingress_rule" "vpce_https" {
   description       = "HTTPS from VPC to interface endpoints"
 }
 
-# HTTP — S3 gateway endpoint
-resource "aws_vpc_security_group_ingress_rule" "vpce_http" {
-  security_group_id = aws_security_group.vpc_endpoints.id
-  cidr_ipv4         = var.vpc_cidr
-  from_port         = 80
-  to_port           = 80
-  ip_protocol       = "tcp"
-  description       = "HTTP from VPC for S3 gateway endpoint"
-}
