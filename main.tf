@@ -21,6 +21,7 @@ locals {
     "<company>-app-supportgroup"    = "Security_Operations_Support"
     "<company>-provisioner-repo"    = "placeholder"
     "<company>-iam-access-control"  = "netsec"
+    "<company>-provisioner-workspace" = "600001725-${var.environment}-sg-${var.account_id}"
   }
 
   # Standard tags applied to all resources (mandatory tags take precedence)
