@@ -7,6 +7,7 @@ variables {
   account_id        = "123456789012"
   vpc_id            = "vpc-0123456789abcdef0"
   baseline_profiles = ["eks-internet"]
+  environment       = "test"
   tags = {
     Environment = "test"
   }

@@ -12,13 +12,24 @@ terraform {
 }
 
 locals {
-  # Standard tags applied to all resources
+  # Corporate mandatory tags — static values hardcoded so consumers don't need to know them
+  mandatory_tags = {
+    "<company>-app-env"             = var.environment
+    "<company>-data-classification" = "internal"
+    "<company>-app-carid"           = "600001725"
+    "<company>-ops-supportgroup"    = "Security_Operations_Support"
+    "<company>-app-supportgroup"    = "Security_Operations_Support"
+    "<company>-provisioner-repo"    = "placeholder"
+    "<company>-iam-access-control"  = "netsec"
+  }
+
+  # Standard tags applied to all resources (mandatory tags take precedence)
   common_tags = merge(var.tags, {
-    ManagedBy   = "sg-platform"
-    Module      = "baseline"
-    Account     = var.account_id
-    Repository  = "aws-security-groups"
-  })
+    ManagedBy  = "sg-platform"
+    Module     = "baseline"
+    Account    = var.account_id
+    Repository = "aws-security-groups"
+  }, local.mandatory_tags)
 
   # Convert profile list to set for easier lookup
   enabled_profiles = toset(var.baseline_profiles)
@@ -30,14 +41,14 @@ locals {
     contains(local.enabled_profiles, "eks-standard") ||
     contains(local.enabled_profiles, "eks-internet")
   )
-  enable_eks_standard  = contains(local.enabled_profiles, "eks-standard")
-  enable_eks_internet  = contains(local.enabled_profiles, "eks-internet")
+  enable_eks_standard = contains(local.enabled_profiles, "eks-standard")
+  enable_eks_internet = contains(local.enabled_profiles, "eks-internet")
 }
 
 # Data source to get VPC information if not provided
 data "aws_vpc" "main" {
   count = var.vpc_id == "auto" ? 1 : 0
-  
+
   filter {
     name   = "state"
     values = ["available"]
