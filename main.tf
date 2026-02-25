@@ -24,13 +24,8 @@ locals {
     "<company>-provisioner-workspace" = "600001725-${var.environment}-sg-${var.account_id}"
   }
 
-  # Standard tags applied to all resources (mandatory tags take precedence)
-  common_tags = merge(var.tags, {
-    ManagedBy  = "sg-platform"
-    Module     = "baseline"
-    Account    = var.account_id
-    Repository = "aws-security-groups"
-  }, local.mandatory_tags)
+  # Consumer tags + mandatory corporate tags (mandatory always wins)
+  common_tags = merge(var.tags, local.mandatory_tags)
 
   # Convert profile list to set for easier lookup
   enabled_profiles = toset(var.baseline_profiles)
