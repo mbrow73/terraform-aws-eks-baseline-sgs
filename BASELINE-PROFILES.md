@@ -8,11 +8,11 @@
 
 | Security Group | Description |
 |---|---|
-| `baseline-vpc-endpoints` | VPC interface endpoints — ingress from local VPC only |
-| `baseline-eks-cluster` | EKS control plane — API server + kubelet/webhook egress |
-| `baseline-eks-workers` | Worker nodes — zero-trust intra-cluster mesh |
-| `baseline-istio-nodes` | Istio intranet gateways — NLB ingress + mesh egress |
-| `baseline-intranet-nlb` | Intranet NLB — corporate/on-prem ingress |
+| `baseline-vpc-endpoints` | VPC interface endpoints - ingress from local VPC only |
+| `baseline-eks-cluster` | EKS control plane - API server + kubelet/webhook egress |
+| `baseline-eks-workers` | Worker nodes - zero-trust intra-cluster mesh |
+| `baseline-istio-nodes` | Istio intranet gateways - NLB ingress + mesh egress |
+| `baseline-intranet-nlb` | Intranet NLB - corporate/on-prem ingress |
 
 ### Rules
 
@@ -82,7 +82,7 @@
 
 ## eks-internet (Internet + Intranet)
 
-> 7 security groups, ~57 rules. Zero `0.0.0.0/0`. Client IP preservation ON — istio sees WAF NAT IPs, not NLB IPs.
+> 7 security groups, ~57 rules. Zero `0.0.0.0/0`. NLB client IP preservation enabled - Istio targets see the WAF's outbound NAT IPs (the true upstream source) rather than the NLB's private IPs, enabling security group rules scoped to WAF origin.
 >
 > **Traffic flow:** WAF NAT IPs → IGW → GWLBe (transparent) → Internet NLB → Istio inet → Workers
 >
@@ -92,13 +92,13 @@
 
 | Security Group | Description |
 |---|---|
-| `baseline-vpc-endpoints` | VPC interface endpoints — ingress from local VPC only |
-| `baseline-eks-cluster` | EKS control plane — shared, serves both istio paths |
-| `baseline-eks-workers` | Worker nodes — shared, ingress from both istio SGs |
-| `baseline-istio-intranet-nodes` | Istio intranet gateways — corporate/on-prem traffic |
-| `baseline-intranet-nlb` | Intranet NLB — corporate prefix list ingress |
-| `baseline-istio-inet-nodes` | Istio internet gateways — WAF/internet traffic |
-| `baseline-internet-nlb` | Internet NLB — WAF NAT IP ingress (client IP preserved) |
+| `baseline-vpc-endpoints` | VPC interface endpoints - ingress from local VPC only |
+| `baseline-eks-cluster` | EKS control plane - shared, serves both istio paths |
+| `baseline-eks-workers` | Worker nodes - shared, ingress from both istio SGs |
+| `baseline-istio-intranet-nodes` | Istio intranet gateways - corporate/on-prem traffic |
+| `baseline-intranet-nlb` | Intranet NLB - corporate prefix list ingress |
+| `baseline-istio-inet-nodes` | Istio internet gateways - WAF/internet traffic |
+| `baseline-internet-nlb` | Internet NLB - WAF NAT IP ingress (client IP preserved) |
 
 ### Rules
 
