@@ -64,8 +64,12 @@ data "aws_vpc" "selected" {
 
 # Use the discovered or selected VPC
 locals {
-  vpc_id   = var.vpc_id == "auto" ? data.aws_vpc.main[0].id : data.aws_vpc.selected[0].id
-  vpc_cidr = var.vpc_id == "auto" ? data.aws_vpc.main[0].cidr_block : data.aws_vpc.selected[0].cidr_block
+  vpc_id = var.vpc_id == "auto" ? data.aws_vpc.main[0].id : data.aws_vpc.selected[0].id
+  vpc_cidrs = var.vpc_id == "auto" ? [
+    for assoc in data.aws_vpc.main[0].cidr_block_associations : assoc.cidr_block
+    ] : [
+    for assoc in data.aws_vpc.selected[0].cidr_block_associations : assoc.cidr_block
+  ]
 }
 
 #
@@ -79,7 +83,7 @@ module "vpc_endpoints" {
   source = "./profiles/vpc-endpoints"
 
   vpc_id      = local.vpc_id
-  vpc_cidr    = local.vpc_cidr
+  vpc_cidrs   = local.vpc_cidrs
   account_id  = var.account_id
   common_tags = local.common_tags
 }
