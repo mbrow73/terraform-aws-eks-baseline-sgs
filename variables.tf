@@ -54,8 +54,3 @@ variable "tags" {
   default     = {}
 }
 
-variable "share_prefix_lists_with_accounts" {
-  description = "List of AWS account IDs to share prefix lists with via RAM"
-  type        = list(string)
-  default     = []
-}

@@ -210,38 +210,15 @@ output "baseline_sg_ids" {
 }
 ```
 
-### Cross-account prefix list sharing
-
-If accounts need to reference prefix lists from other accounts:
-
-```hcl
-module "baseline_sgs" {
-  source  = "app.terraform.io/ORGNAME/eks-baseline-sgs/aws"
-  version = "1.0.0"
-
-  account_id        = "111222333444"
-  vpc_id            = module.vpc.vpc_id
-  environment       = "prod"
-  baseline_profiles = ["eks-standard"]
-
-  share_prefix_lists_with_accounts = [
-    "555666777888",
-    "999000111222",
-  ]
-}
-```
-
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|----------|
 | `account_id` | AWS Account ID (12-digit) | `string` | — | yes |
 | `vpc_id` | VPC ID where security groups will be created | `string` | — | yes |
-| `region` | AWS region (for prefix list overrides) | `string` | `"us-east-1"` | no |
 | `baseline_profiles` | Profiles to deploy | `list(string)` | `[]` | yes |
 | `environment` | Environment name for `<company>-app-env` tag | `string` | — | yes |
 | `tags` | Additional tags (corporate mandatory tags are auto-included) | `map(string)` | `{}` | no |
-| `share_prefix_lists_with_accounts` | Account IDs for RAM prefix list sharing | `list(string)` | `[]` | no |
 
 ## Outputs
 
