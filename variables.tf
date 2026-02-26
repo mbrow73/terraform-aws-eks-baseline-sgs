@@ -42,11 +42,6 @@ variable "environment" {
   type        = string
 }
 
-variable "waf_nat_ips_pl_id" {
-  description = "ID of the waf-nat-ips managed prefix list (required for eks-internet profile). This prefix list is externally managed."
-  type        = string
-  default     = ""
-}
 
 variable "tags" {
   description = "Additional tags to apply to all resources. Corporate mandatory tags are automatically included — you do not need to pass them here."

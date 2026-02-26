@@ -81,5 +81,6 @@ output "prefix_lists" {
   value = {
     corporate_networks = aws_ec2_managed_prefix_list.corporate_networks.id
     waf_saas_providers = aws_ec2_managed_prefix_list.waf_saas_providers.id
+    waf_nat_ips        = aws_ec2_managed_prefix_list.waf_nat_ips.id
   }
 }
