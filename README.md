@@ -237,7 +237,6 @@ module "baseline_sgs" {
 |------|-------------|------|---------|----------|
 | `account_id` | AWS Account ID (12-digit) | `string` | — | yes |
 | `vpc_id` | VPC ID or `"auto"` for discovery | `string` | `"auto"` | no |
-| `region` | AWS region (for prefix list overrides) | `string` | `"us-east-1"` | no |
 | `baseline_profiles` | Profiles to deploy | `list(string)` | `[]` | yes |
 | `environment` | Environment name for `<company>-app-env` tag | `string` | — | yes |
 | `tags` | Additional tags (corporate mandatory tags are auto-included) | `map(string)` | `{}` | no |
@@ -271,7 +270,7 @@ module "baseline_sgs" {
 ### Prefix Lists
 | Name | Description |
 |------|-------------|
-| `prefix_lists` | Map of all managed prefix list IDs |
+| `prefix_lists` | Map of managed prefix list IDs (corporate_networks, waf_saas_providers) |
 
 ## Architecture
 
