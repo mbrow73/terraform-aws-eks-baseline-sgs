@@ -42,14 +42,15 @@ variable "environment" {
   type        = string
 }
 
+variable "waf_nat_ips_pl_id" {
+  description = "ID of the waf-nat-ips managed prefix list (required for eks-internet profile). This prefix list is externally managed."
+  type        = string
+  default     = ""
+}
+
 variable "tags" {
   description = "Additional tags to apply to all resources. Corporate mandatory tags are automatically included — you do not need to pass them here."
   type        = map(string)
   default     = {}
 }
 
-variable "share_prefix_lists_with_accounts" {
-  description = "List of AWS account IDs to share prefix lists with via RAM"
-  type        = list(string)
-  default     = []
-}

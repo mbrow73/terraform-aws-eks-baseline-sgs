@@ -43,30 +43,3 @@ resource "aws_ec2_managed_prefix_list" "waf_saas_providers" {
   })
 }
 
-# RAM sharing for cross-account prefix list access
-resource "aws_ram_resource_share" "prefix_lists" {
-  count                     = length(var.share_prefix_lists_with_accounts) > 0 ? 1 : 0
-  name                      = "baseline-sgs-prefix-lists-${var.account_id}"
-  allow_external_principals = false
-
-  tags = merge(local.common_tags, {
-    Name    = "baseline-sgs-prefix-lists"
-    Purpose = "cross-account-sharing"
-  })
-}
-
-resource "aws_ram_resource_association" "prefix_lists" {
-  for_each = length(var.share_prefix_lists_with_accounts) > 0 ? {
-    corporate_networks = aws_ec2_managed_prefix_list.corporate_networks.arn
-    waf_saas_providers = aws_ec2_managed_prefix_list.waf_saas_providers.arn
-  } : {}
-
-  resource_arn       = each.value
-  resource_share_arn = aws_ram_resource_share.prefix_lists[0].arn
-}
-
-resource "aws_ram_principal_association" "accounts" {
-  count              = length(var.share_prefix_lists_with_accounts)
-  principal          = var.share_prefix_lists_with_accounts[count.index]
-  resource_share_arn = aws_ram_resource_share.prefix_lists[0].arn
-}

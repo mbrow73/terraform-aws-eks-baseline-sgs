@@ -73,10 +73,11 @@ module "eks_standard" {
   count  = local.enable_eks_standard ? 1 : 0
   source = "./profiles/eks-standard"
 
-  vpc_id              = local.vpc_id
-  vpc_endpoints_sg_id = module.vpc_endpoints[0].vpc_endpoints_security_group_id
-  account_id          = var.account_id
-  common_tags         = local.common_tags
+  vpc_id                   = local.vpc_id
+  vpc_endpoints_sg_id      = module.vpc_endpoints[0].vpc_endpoints_security_group_id
+  corporate_networks_pl_id = aws_ec2_managed_prefix_list.corporate_networks.id
+  account_id               = var.account_id
+  common_tags              = local.common_tags
 }
 
 # EKS Internet Profile (intranet + internet paths)
@@ -85,8 +86,10 @@ module "eks_internet" {
   count  = local.enable_eks_internet ? 1 : 0
   source = "./profiles/eks-internet"
 
-  vpc_id              = local.vpc_id
-  vpc_endpoints_sg_id = module.vpc_endpoints[0].vpc_endpoints_security_group_id
-  account_id          = var.account_id
-  common_tags         = local.common_tags
+  vpc_id                   = local.vpc_id
+  vpc_endpoints_sg_id      = module.vpc_endpoints[0].vpc_endpoints_security_group_id
+  corporate_networks_pl_id = aws_ec2_managed_prefix_list.corporate_networks.id
+  waf_nat_ips_pl_id        = var.waf_nat_ips_pl_id
+  account_id               = var.account_id
+  common_tags              = local.common_tags
 }
