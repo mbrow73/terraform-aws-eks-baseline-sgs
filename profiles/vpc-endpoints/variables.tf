@@ -5,9 +5,9 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "vpc_cidr" {
-  description = "VPC CIDR block for ingress rules"
-  type        = string
+variable "vpc_cidrs" {
+  description = "VPC CIDR blocks for ingress rules (supports multiple CIDRs)"
+  type        = list(string)
 }
 
 variable "account_id" {

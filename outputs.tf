@@ -6,9 +6,9 @@ output "vpc_id" {
   value       = local.vpc_id
 }
 
-output "vpc_cidr" {
-  description = "CIDR block of the VPC"
-  value       = local.vpc_cidr
+output "vpc_cidrs" {
+  description = "CIDR blocks of the VPC (primary + secondary)"
+  value       = local.vpc_cidrs
 }
 
 # Enabled Profiles
