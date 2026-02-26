@@ -133,20 +133,3 @@ prefix_lists:
       ManagedBy: "sg-platform"
       Type: "monitoring"
 
-# Regional overrides for prefix lists that vary by region
-regional_overrides:
-  us-west-2:
-    aws-vpc-endpoints:
-      entries:
-        - cidr: "10.201.1.0/24"
-          description: "AWS S3 VPC endpoint range us-west-2"
-        - cidr: "10.201.2.0/24"
-          description: "AWS S3 service range us-west-2"
-          
-  eu-west-1:
-    aws-vpc-endpoints:
-      entries:
-        - cidr: "10.202.1.0/24"
-          description: "AWS S3 VPC endpoint range eu-west-1"
-        - cidr: "10.202.2.0/24"
-          description: "AWS S3 service range eu-west-1"

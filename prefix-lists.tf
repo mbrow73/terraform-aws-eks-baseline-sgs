@@ -2,16 +2,7 @@
 # Creates AWS Managed Prefix Lists from centralized YAML configuration
 
 locals {
-  prefix_lists_config = yamldecode(file("${path.module}/prefix-lists.yaml"))
-
-  prefix_lists = merge(
-    local.prefix_lists_config.prefix_lists,
-    lookup(
-      lookup(local.prefix_lists_config, "regional_overrides", {}),
-      var.region,
-      {}
-    )
-  )
+  prefix_lists = yamldecode(file("${path.module}/prefix-lists.yaml")).prefix_lists
 }
 
 # Corporate Networks

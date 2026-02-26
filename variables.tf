@@ -7,11 +7,6 @@ variable "account_id" {
   }
 }
 
-variable "region" {
-  description = "AWS region for deployment (used for prefix list regional overrides)"
-  type        = string
-  default     = "us-east-1"
-}
 
 variable "vpc_id" {
   description = "VPC ID where security groups will be created. Use 'auto' for automatic discovery."
