@@ -41,35 +41,14 @@ locals {
   enable_eks_internet = contains(local.enabled_profiles, "eks-internet")
 }
 
-# Data source to get VPC information if not provided
-data "aws_vpc" "main" {
-  count = var.vpc_id == "auto" ? 1 : 0
-
-  filter {
-    name   = "state"
-    values = ["available"]
-  }
-
-  # If multiple VPCs exist, prefer the one tagged as 'main' or 'default'
-  filter {
-    name   = "tag:Name"
-    values = ["*main*", "*default*", "*primary*"]
-  }
-}
-
+# Look up VPC details from the provided VPC ID
 data "aws_vpc" "selected" {
-  count = var.vpc_id != "auto" ? 1 : 0
-  id    = var.vpc_id
+  id = var.vpc_id
 }
 
-# Use the discovered or selected VPC
 locals {
-  vpc_id = var.vpc_id == "auto" ? data.aws_vpc.main[0].id : data.aws_vpc.selected[0].id
-  vpc_cidrs = var.vpc_id == "auto" ? [
-    for assoc in data.aws_vpc.main[0].cidr_block_associations : assoc.cidr_block
-    ] : [
-    for assoc in data.aws_vpc.selected[0].cidr_block_associations : assoc.cidr_block
-  ]
+  vpc_id    = data.aws_vpc.selected.id
+  vpc_cidrs = [for assoc in data.aws_vpc.selected.cidr_block_associations : assoc.cidr_block]
 }
 
 #

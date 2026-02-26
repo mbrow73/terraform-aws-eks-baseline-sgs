@@ -9,13 +9,12 @@ variable "account_id" {
 
 
 variable "vpc_id" {
-  description = "VPC ID where security groups will be created. Use 'auto' for automatic discovery."
+  description = "VPC ID where security groups will be created"
   type        = string
-  default     = "auto"
 
   validation {
-    condition     = var.vpc_id == "auto" || can(regex("^vpc-[a-f0-9]{8}([a-f0-9]{9})?$", var.vpc_id))
-    error_message = "VPC ID must be 'auto' or a valid VPC ID (vpc-xxxxxxxx)."
+    condition     = can(regex("^vpc-[a-f0-9]{8}([a-f0-9]{9})?$", var.vpc_id))
+    error_message = "VPC ID must be a valid VPC ID (vpc-xxxxxxxx)."
   }
 }
 

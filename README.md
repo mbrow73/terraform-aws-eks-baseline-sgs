@@ -236,7 +236,7 @@ module "baseline_sgs" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|----------|
 | `account_id` | AWS Account ID (12-digit) | `string` | — | yes |
-| `vpc_id` | VPC ID or `"auto"` for discovery | `string` | `"auto"` | no |
+| `vpc_id` | VPC ID where security groups will be created | `string` | — | yes |
 | `region` | AWS region (for prefix list overrides) | `string` | `"us-east-1"` | no |
 | `baseline_profiles` | Profiles to deploy | `list(string)` | `[]` | yes |
 | `environment` | Environment name for `<company>-app-env` tag | `string` | — | yes |
