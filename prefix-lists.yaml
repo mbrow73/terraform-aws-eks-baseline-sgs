@@ -21,7 +21,7 @@ prefix_lists:
     tags:
       ManagedBy: "sg-platform"
       Type: "corporate"
-      
+
   # WAF and CDN service IPs
   waf-saas-providers:
     name: "waf-saas-providers"
@@ -64,72 +64,3 @@ prefix_lists:
     tags:
       ManagedBy: "sg-platform"
       Type: "waf-cdn"
-      
-  # AWS VPC Endpoint service IPs (for S3, ECR, etc.)
-  aws-vpc-endpoints:
-    name: "aws-vpc-endpoints"
-    description: "AWS VPC Endpoint service IP ranges"
-    max_entries: 50
-    address_family: "IPv4"
-    entries:
-      # These are region-specific and should be updated based on your regions
-      # Example for us-east-1 VPC endpoint ranges
-      - cidr: "10.200.1.0/24"
-        description: "AWS S3 VPC endpoint range us-east-1"
-      - cidr: "10.200.2.0/24"
-        description: "AWS S3 service range us-east-1"
-      - cidr: "10.200.3.0/24"
-        description: "AWS ECR VPC endpoint range"
-      - cidr: "10.200.4.0/24"
-        description: "AWS EKS API endpoint range"
-    tags:
-      ManagedBy: "sg-platform"
-      Type: "aws-services"
-      
-  # Application load balancer subnets
-  # CI/CD and build system IPs
-  ci-cd-systems:
-    name: "ci-cd-systems"
-    description: "CI/CD system IP ranges (GitHub Actions, Jenkins, etc.)"
-    max_entries: 20
-    address_family: "IPv4"
-    entries:
-      # GitHub Actions runner IP ranges (these change, so monitor GitHub meta API)
-      - cidr: "10.150.1.0/24"
-        description: "GitHub Actions hosted runners"
-      - cidr: "10.150.2.0/24"
-        description: "GitHub Actions hosted runners"
-      - cidr: "10.150.3.0/24"
-        description: "GitHub Actions hosted runners"
-      - cidr: "10.150.4.0/24"
-        description: "GitHub Actions hosted runners"
-      # Self-hosted runners (example ranges)
-      - cidr: "10.50.0.0/24"
-        description: "Self-hosted GitHub Actions runners"
-      - cidr: "10.51.0.0/24"
-        description: "Jenkins build agents"
-    tags:
-      ManagedBy: "sg-platform"
-      Type: "ci-cd"
-      
-  # Monitoring and logging services
-  monitoring-services:
-    name: "monitoring-services"
-    description: "External monitoring service IP ranges"
-    max_entries: 20
-    address_family: "IPv4"
-    entries:
-      # DataDog agent communication
-      - cidr: "10.160.1.0/24"
-        description: "DataDog US1 region"
-      - cidr: "10.160.2.0/24"
-        description: "DataDog US1 region"
-      # New Relic
-      - cidr: "10.160.3.0/24"
-        description: "New Relic collectors"
-      - cidr: "10.160.4.0/24"
-        description: "New Relic collectors"
-    tags:
-      ManagedBy: "sg-platform"
-      Type: "monitoring"
-

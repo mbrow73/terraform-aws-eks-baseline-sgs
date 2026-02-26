@@ -79,10 +79,7 @@ output "intranet_nlb_security_group_id" {
 output "prefix_lists" {
   description = "Information about managed prefix lists"
   value = {
-    corporate_networks  = aws_ec2_managed_prefix_list.corporate_networks.id
-    waf_saas_providers  = aws_ec2_managed_prefix_list.waf_saas_providers.id
-    aws_vpc_endpoints   = aws_ec2_managed_prefix_list.aws_vpc_endpoints.id
-    ci_cd_systems       = aws_ec2_managed_prefix_list.ci_cd_systems.id
-    monitoring_services = aws_ec2_managed_prefix_list.monitoring_services.id
+    corporate_networks = aws_ec2_managed_prefix_list.corporate_networks.id
+    waf_saas_providers = aws_ec2_managed_prefix_list.waf_saas_providers.id
   }
 }
