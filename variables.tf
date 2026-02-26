@@ -44,7 +44,7 @@ variable "environment" {
 
 
 variable "tags" {
-  description = "Additional tags to apply to all resources. Corporate mandatory tags are automatically included — you do not need to pass them here."
+  description = "Additional tags to apply to all resources. Corporate mandatory tags are automatically included - you do not need to pass them here."
   type        = map(string)
   default     = {}
 }

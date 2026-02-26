@@ -2,7 +2,7 @@
 #
 # Single security group for all VPC interface endpoints.
 # Ingress from local VPC CIDR on 443 for all interface endpoints.
-# No egress — endpoint ENIs respond to requests, they don't initiate.
+# No egress - endpoint ENIs respond to requests, they don't initiate.
 #
 # Risk acceptance: All resources in the VPC can reach all endpoints.
 # Per-endpoint access control is handled by:
@@ -21,7 +21,7 @@ terraform {
 
 resource "aws_security_group" "vpc_endpoints" {
   name_prefix = "baseline-vpc-endpoints-"
-  description = "VPC endpoints — ingress from local VPC only"
+  description = "VPC endpoints - ingress from local VPC only"
   vpc_id      = var.vpc_id
 
   tags = merge(var.common_tags, {
@@ -31,7 +31,7 @@ resource "aws_security_group" "vpc_endpoints" {
   })
 }
 
-# HTTPS — all interface endpoints (ECR, STS, CloudWatch, SSM, etc.)
+# HTTPS - all interface endpoints (ECR, STS, CloudWatch, SSM, etc.)
 # One rule per VPC CIDR block (primary + secondary)
 resource "aws_vpc_security_group_ingress_rule" "vpce_https" {
   for_each = toset(var.vpc_cidrs)
