@@ -33,14 +33,6 @@ terraform {
 # Data Sources
 # -------------------------------------------------------
 
-data "aws_ec2_managed_prefix_list" "corporate_networks" {
-  name = "corporate-networks"
-}
-
-data "aws_ec2_managed_prefix_list" "waf_nat_ips" {
-  name = "waf-nat-ips"
-}
-
 # -------------------------------------------------------
 # Security Group Shells (no inline rules — avoids cycles)
 # -------------------------------------------------------
@@ -152,7 +144,7 @@ resource "aws_vpc_security_group_ingress_rule" "cluster_from_istio_inet_443" {
 
 resource "aws_vpc_security_group_ingress_rule" "cluster_from_corporate_443" {
   security_group_id = aws_security_group.eks_cluster.id
-  prefix_list_id    = data.aws_ec2_managed_prefix_list.corporate_networks.id
+  prefix_list_id    = var.corporate_networks_pl_id
   from_port         = 443
   to_port           = 443
   ip_protocol       = "tcp"
@@ -365,7 +357,7 @@ resource "aws_vpc_security_group_egress_rule" "workers_self_15006" {
 # Workers → on-prem addons via TGW
 resource "aws_vpc_security_group_egress_rule" "workers_to_onprem_443" {
   security_group_id = aws_security_group.eks_workers.id
-  prefix_list_id    = data.aws_ec2_managed_prefix_list.corporate_networks.id
+  prefix_list_id    = var.corporate_networks_pl_id
   from_port         = 443
   to_port           = 443
   ip_protocol       = "tcp"
@@ -495,7 +487,7 @@ resource "aws_vpc_security_group_egress_rule" "istio_intranet_to_workers_dns_udp
 
 resource "aws_vpc_security_group_ingress_rule" "intranet_nlb_from_corporate_443" {
   security_group_id = aws_security_group.intranet_nlb.id
-  prefix_list_id    = data.aws_ec2_managed_prefix_list.corporate_networks.id
+  prefix_list_id    = var.corporate_networks_pl_id
   from_port         = 443
   to_port           = 443
   ip_protocol       = "tcp"
@@ -504,7 +496,7 @@ resource "aws_vpc_security_group_ingress_rule" "intranet_nlb_from_corporate_443"
 
 resource "aws_vpc_security_group_ingress_rule" "intranet_nlb_from_corporate_80" {
   security_group_id = aws_security_group.intranet_nlb.id
-  prefix_list_id    = data.aws_ec2_managed_prefix_list.corporate_networks.id
+  prefix_list_id    = var.corporate_networks_pl_id
   from_port         = 80
   to_port           = 80
   ip_protocol       = "tcp"
@@ -520,7 +512,7 @@ resource "aws_vpc_security_group_ingress_rule" "intranet_nlb_from_corporate_80" 
 
 resource "aws_vpc_security_group_ingress_rule" "istio_inet_from_waf_8080" {
   security_group_id = aws_security_group.istio_inet_nodes.id
-  prefix_list_id    = data.aws_ec2_managed_prefix_list.waf_nat_ips.id
+  prefix_list_id    = var.waf_nat_ips_pl_id
   from_port         = 8080
   to_port           = 8080
   ip_protocol       = "tcp"
@@ -529,7 +521,7 @@ resource "aws_vpc_security_group_ingress_rule" "istio_inet_from_waf_8080" {
 
 resource "aws_vpc_security_group_ingress_rule" "istio_inet_from_waf_8443" {
   security_group_id = aws_security_group.istio_inet_nodes.id
-  prefix_list_id    = data.aws_ec2_managed_prefix_list.waf_nat_ips.id
+  prefix_list_id    = var.waf_nat_ips_pl_id
   from_port         = 8443
   to_port           = 8443
   ip_protocol       = "tcp"
@@ -538,7 +530,7 @@ resource "aws_vpc_security_group_ingress_rule" "istio_inet_from_waf_8443" {
 
 resource "aws_vpc_security_group_ingress_rule" "istio_inet_from_waf_15021" {
   security_group_id = aws_security_group.istio_inet_nodes.id
-  prefix_list_id    = data.aws_ec2_managed_prefix_list.waf_nat_ips.id
+  prefix_list_id    = var.waf_nat_ips_pl_id
   from_port         = 15021
   to_port           = 15021
   ip_protocol       = "tcp"
@@ -636,7 +628,7 @@ resource "aws_vpc_security_group_egress_rule" "istio_inet_to_workers_dns_udp" {
 
 resource "aws_vpc_security_group_ingress_rule" "internet_nlb_from_waf_443" {
   security_group_id = aws_security_group.internet_nlb.id
-  prefix_list_id    = data.aws_ec2_managed_prefix_list.waf_nat_ips.id
+  prefix_list_id    = var.waf_nat_ips_pl_id
   from_port         = 443
   to_port           = 443
   ip_protocol       = "tcp"
@@ -645,7 +637,7 @@ resource "aws_vpc_security_group_ingress_rule" "internet_nlb_from_waf_443" {
 
 resource "aws_vpc_security_group_ingress_rule" "internet_nlb_from_waf_80" {
   security_group_id = aws_security_group.internet_nlb.id
-  prefix_list_id    = data.aws_ec2_managed_prefix_list.waf_nat_ips.id
+  prefix_list_id    = var.waf_nat_ips_pl_id
   from_port         = 80
   to_port           = 80
   ip_protocol       = "tcp"

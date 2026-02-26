@@ -15,6 +15,11 @@ variable "account_id" {
   type        = string
 }
 
+variable "corporate_networks_pl_id" {
+  description = "ID of the corporate-networks managed prefix list"
+  type        = string
+}
+
 variable "common_tags" {
   description = "Common tags to apply to all resources"
   type        = map(string)
