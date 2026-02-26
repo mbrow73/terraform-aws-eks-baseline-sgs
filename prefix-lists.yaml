@@ -65,7 +65,7 @@ prefix_lists:
       ManagedBy: "sg-platform"
       Type: "waf-cdn"
 
-  # WAF outbound NAT IPs — the source IPs that NLBs see when client IP preservation is enabled
+  # WAF outbound NAT IPs - the source IPs that NLBs see when client IP preservation is enabled
   waf-nat-ips:
     name: "waf-nat-ips"
     description: "WAF outbound NAT IPs for internet-facing NLB ingress"

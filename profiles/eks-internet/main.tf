@@ -5,7 +5,7 @@
 #
 # 6 security groups:
 #   1. baseline-eks-cluster          (control plane ENIs)
-#   2. baseline-eks-workers          (worker nodes — serves both istio paths)
+#   2. baseline-eks-workers          (worker nodes - serves both istio paths)
 #   3. baseline-istio-intranet-nodes (intranet istio gateways)
 #   4. baseline-intranet-nlb         (corporate/on-prem NLB)
 #   5. baseline-istio-inet-nodes     (internet istio gateways)
@@ -34,12 +34,12 @@ terraform {
 # -------------------------------------------------------
 
 # -------------------------------------------------------
-# Security Group Shells (no inline rules — avoids cycles)
+# Security Group Shells (no inline rules - avoids cycles)
 # -------------------------------------------------------
 
 resource "aws_security_group" "eks_cluster" {
   name_prefix = "baseline-eks-cluster-"
-  description = "EKS control plane — API server + kubelet/webhook egress"
+  description = "EKS control plane - API server + kubelet/webhook egress"
   vpc_id      = var.vpc_id
 
   tags = merge(var.common_tags, {
@@ -51,7 +51,7 @@ resource "aws_security_group" "eks_cluster" {
 
 resource "aws_security_group" "eks_workers" {
   name_prefix = "baseline-eks-workers-"
-  description = "EKS worker nodes — serves both intranet and internet istio paths"
+  description = "EKS worker nodes - serves both intranet and internet istio paths"
   vpc_id      = var.vpc_id
 
   tags = merge(var.common_tags, {
@@ -63,7 +63,7 @@ resource "aws_security_group" "eks_workers" {
 
 resource "aws_security_group" "istio_intranet_nodes" {
   name_prefix = "baseline-istio-intranet-"
-  description = "Istio intranet gateways — corporate/on-prem traffic"
+  description = "Istio intranet gateways - corporate/on-prem traffic"
   vpc_id      = var.vpc_id
 
   tags = merge(var.common_tags, {
@@ -75,7 +75,7 @@ resource "aws_security_group" "istio_intranet_nodes" {
 
 resource "aws_security_group" "intranet_nlb" {
   name_prefix = "baseline-intranet-nlb-"
-  description = "Intranet NLB — corporate/on-prem ingress"
+  description = "Intranet NLB - corporate/on-prem ingress"
   vpc_id      = var.vpc_id
 
   tags = merge(var.common_tags, {
@@ -87,7 +87,7 @@ resource "aws_security_group" "intranet_nlb" {
 
 resource "aws_security_group" "istio_inet_nodes" {
   name_prefix = "baseline-istio-inet-"
-  description = "Istio internet gateways — WAF/internet traffic"
+  description = "Istio internet gateways - WAF/internet traffic"
   vpc_id      = var.vpc_id
 
   tags = merge(var.common_tags, {
@@ -99,7 +99,7 @@ resource "aws_security_group" "istio_inet_nodes" {
 
 resource "aws_security_group" "internet_nlb" {
   name_prefix = "baseline-internet-nlb-"
-  description = "Internet NLB — WAF NAT IP ingress (client IP preserved)"
+  description = "Internet NLB - WAF NAT IP ingress (client IP preserved)"
   vpc_id      = var.vpc_id
 
   tags = merge(var.common_tags, {
@@ -110,7 +110,7 @@ resource "aws_security_group" "internet_nlb" {
 }
 
 # =======================================================
-# CLUSTER — Control Plane ENIs
+# CLUSTER - Control Plane ENIs
 # =======================================================
 
 # --- Ingress ---
@@ -199,7 +199,7 @@ resource "aws_vpc_security_group_egress_rule" "cluster_to_workers_15017" {
 }
 
 # =======================================================
-# WORKERS — Shared Worker Nodes (serves both istio paths)
+# WORKERS - Shared Worker Nodes (serves both istio paths)
 # =======================================================
 
 # --- Ingress ---
@@ -365,10 +365,10 @@ resource "aws_vpc_security_group_egress_rule" "workers_to_onprem_443" {
 }
 
 # =======================================================
-# ISTIO INTRANET NODES — Corporate/On-Prem Path
+# ISTIO INTRANET NODES - Corporate/On-Prem Path
 # =======================================================
 
-# --- Ingress (from intranet NLB — client IP preserved = corporate PL) ---
+# --- Ingress (from intranet NLB - client IP preserved = corporate PL) ---
 
 resource "aws_vpc_security_group_ingress_rule" "istio_intranet_from_nlb_8080" {
   security_group_id            = aws_security_group.istio_intranet_nodes.id
@@ -481,7 +481,7 @@ resource "aws_vpc_security_group_egress_rule" "istio_intranet_to_workers_dns_udp
 }
 
 # =======================================================
-# INTRANET NLB — Corporate/On-Prem
+# INTRANET NLB - Corporate/On-Prem
 # TODO: Max to fill in additional rules
 # =======================================================
 
@@ -496,8 +496,8 @@ resource "aws_vpc_security_group_ingress_rule" "intranet_nlb_from_corporate_443"
 
 
 # =======================================================
-# ISTIO INTERNET NODES — WAF/Internet Path
-# Client IP preserved through NLB — source is WAF NAT IPs
+# ISTIO INTERNET NODES - WAF/Internet Path
+# Client IP preserved through NLB - source is WAF NAT IPs
 # =======================================================
 
 # --- Ingress (source = WAF NAT IPs, preserved through transparent NLB) ---
@@ -613,8 +613,8 @@ resource "aws_vpc_security_group_egress_rule" "istio_inet_to_workers_dns_udp" {
 }
 
 # =======================================================
-# INTERNET NLB — WAF NAT IP Ingress
-# NLB is transparent — this SG is for the NLB ENIs.
+# INTERNET NLB - WAF NAT IP Ingress
+# NLB is transparent - this SG is for the NLB ENIs.
 # Client IP preservation ON, so source = WAF NAT IPs.
 # =======================================================
 

@@ -12,7 +12,7 @@ terraform {
 }
 
 locals {
-  # Corporate mandatory tags — static values hardcoded so consumers don't need to know them
+  # Corporate mandatory tags - static values hardcoded so consumers don't need to know them
   mandatory_tags = {
     "<company>-app-env"             = var.environment
     "<company>-data-classification" = "internal"
@@ -31,7 +31,7 @@ locals {
   enabled_profiles = toset(var.baseline_profiles)
 
   # Check if specific profiles are enabled
-  # Both EKS profiles implicitly require vpc-endpoints — auto-enable it
+  # Both EKS profiles implicitly require vpc-endpoints - auto-enable it
   enable_vpc_endpoints = (
     contains(local.enabled_profiles, "vpc-endpoints") ||
     contains(local.enabled_profiles, "eks-standard") ||

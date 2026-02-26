@@ -23,12 +23,12 @@ terraform {
 # -------------------------------------------------------
 
 # -------------------------------------------------------
-# Security Group Shells (no inline rules — avoids cycles)
+# Security Group Shells (no inline rules - avoids cycles)
 # -------------------------------------------------------
 
 resource "aws_security_group" "eks_cluster" {
   name_prefix = "baseline-eks-cluster-"
-  description = "EKS control plane — API server + kubelet/webhook egress"
+  description = "EKS control plane - API server + kubelet/webhook egress"
   vpc_id      = var.vpc_id
 
   tags = merge(var.common_tags, {
@@ -40,7 +40,7 @@ resource "aws_security_group" "eks_cluster" {
 
 resource "aws_security_group" "eks_workers" {
   name_prefix = "baseline-eks-workers-"
-  description = "EKS worker nodes — zero-trust intra-cluster"
+  description = "EKS worker nodes - zero-trust intra-cluster"
   vpc_id      = var.vpc_id
 
   tags = merge(var.common_tags, {
@@ -52,7 +52,7 @@ resource "aws_security_group" "eks_workers" {
 
 resource "aws_security_group" "istio_nodes" {
   name_prefix = "baseline-istio-nodes-"
-  description = "Istio dedicated gateway nodes — NLB ingress + mesh egress"
+  description = "Istio dedicated gateway nodes - NLB ingress + mesh egress"
   vpc_id      = var.vpc_id
 
   tags = merge(var.common_tags, {
@@ -64,7 +64,7 @@ resource "aws_security_group" "istio_nodes" {
 
 resource "aws_security_group" "intranet_nlb" {
   name_prefix = "baseline-intranet-nlb-"
-  description = "Intranet NLB — corporate/on-prem ingress"
+  description = "Intranet NLB - corporate/on-prem ingress"
   vpc_id      = var.vpc_id
 
   tags = merge(var.common_tags, {
@@ -75,7 +75,7 @@ resource "aws_security_group" "intranet_nlb" {
 }
 
 # =======================================================
-# CLUSTER — Control Plane ENIs
+# CLUSTER - Control Plane ENIs
 # =======================================================
 
 # --- Ingress ---
@@ -146,7 +146,7 @@ resource "aws_vpc_security_group_egress_rule" "cluster_to_workers_15017" {
 }
 
 # =======================================================
-# WORKERS — Worker Node Group
+# WORKERS - Worker Node Group
 # =======================================================
 
 # --- Ingress ---
@@ -290,7 +290,7 @@ resource "aws_vpc_security_group_egress_rule" "workers_to_onprem_443" {
 }
 
 # =======================================================
-# ISTIO NODES — Dedicated Istio Gateway Nodes
+# ISTIO NODES - Dedicated Istio Gateway Nodes
 # =======================================================
 
 # --- Ingress ---
@@ -406,7 +406,7 @@ resource "aws_vpc_security_group_egress_rule" "istio_to_workers_dns_udp" {
 }
 
 # =======================================================
-# INTRANET NLB — Corporate/On-Prem
+# INTRANET NLB - Corporate/On-Prem
 # TODO: Max to fill in additional rules
 # =======================================================
 
