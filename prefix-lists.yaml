@@ -64,3 +64,18 @@ prefix_lists:
     tags:
       ManagedBy: "sg-platform"
       Type: "waf-cdn"
+
+  # WAF outbound NAT IPs — the source IPs that NLBs see when client IP preservation is enabled
+  waf-nat-ips:
+    name: "waf-nat-ips"
+    description: "WAF outbound NAT IPs for internet-facing NLB ingress"
+    max_entries: 20
+    address_family: "IPv4"
+    entries:
+      - cidr: "10.200.1.0/24"
+        description: "WAF NAT pool 1"
+      - cidr: "10.200.2.0/24"
+        description: "WAF NAT pool 2"
+    tags:
+      ManagedBy: "sg-platform"
+      Type: "waf-nat"
