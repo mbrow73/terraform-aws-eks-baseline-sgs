@@ -2,7 +2,7 @@
 
 ## eks-standard (Intranet Only)
 
-> 5 security groups, 37 rules. Zero `0.0.0.0/0`. All cross-SG traffic uses security group references.
+> 5 security groups, 36 rules. Zero `0.0.0.0/0`. All cross-SG traffic uses security group references. HTTPS-only — no port 80.
 
 ### Security Groups
 
@@ -76,13 +76,12 @@
 | Direction | Port | Protocol | Source / Destination | Description |
 |---|---|---|---|---|
 | ingress | 443 | tcp | ← `corporate-networks` PL | HTTPS from corporate |
-| ingress | 80 | tcp | ← `corporate-networks` PL | HTTP from corporate |
 
 ---
 
 ## eks-internet (Internet + Intranet)
 
-> 7 security groups, ~57 rules. Zero `0.0.0.0/0`. NLB client IP preservation enabled - Istio targets see the WAF's outbound NAT IPs (the true upstream source) rather than the NLB's private IPs, enabling security group rules scoped to WAF origin.
+> 7 security groups, ~55 rules. Zero `0.0.0.0/0`. HTTPS-only — no port 80. NLB client IP preservation enabled - Istio targets see the WAF's outbound NAT IPs (the true upstream source) rather than the NLB's private IPs, enabling security group rules scoped to WAF origin.
 >
 > **Traffic flow:** WAF NAT IPs → IGW → GWLBe (transparent) → Internet NLB → Istio inet → Workers
 >
@@ -166,7 +165,6 @@
 | Direction | Port | Protocol | Source / Destination | Description |
 |---|---|---|---|---|
 | ingress | 443 | tcp | ← `corporate-networks` PL | HTTPS from corporate |
-| ingress | 80 | tcp | ← `corporate-networks` PL | HTTP from corporate |
 
 #### baseline-istio-inet-nodes
 
@@ -190,4 +188,3 @@
 | Direction | Port | Protocol | Source / Destination | Description |
 |---|---|---|---|---|
 | ingress | 443 | tcp | ← `waf-nat-ips` PL | HTTPS from WAF NAT IPs |
-| ingress | 80 | tcp | ← `waf-nat-ips` PL | HTTP from WAF NAT IPs |
