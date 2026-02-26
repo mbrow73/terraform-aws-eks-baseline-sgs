@@ -43,63 +43,6 @@ resource "aws_ec2_managed_prefix_list" "waf_saas_providers" {
   })
 }
 
-# AWS VPC Endpoints
-resource "aws_ec2_managed_prefix_list" "aws_vpc_endpoints" {
-  name           = local.prefix_lists.aws-vpc-endpoints.name
-  address_family = local.prefix_lists.aws-vpc-endpoints.address_family
-  max_entries    = local.prefix_lists.aws-vpc-endpoints.max_entries
-
-  dynamic "entry" {
-    for_each = local.prefix_lists.aws-vpc-endpoints.entries
-    content {
-      cidr        = entry.value.cidr
-      description = entry.value.description
-    }
-  }
-
-  tags = merge(local.common_tags, local.prefix_lists.aws-vpc-endpoints.tags, {
-    Name = local.prefix_lists.aws-vpc-endpoints.name
-  })
-}
-
-# CI/CD Systems
-resource "aws_ec2_managed_prefix_list" "ci_cd_systems" {
-  name           = local.prefix_lists.ci-cd-systems.name
-  address_family = local.prefix_lists.ci-cd-systems.address_family
-  max_entries    = local.prefix_lists.ci-cd-systems.max_entries
-
-  dynamic "entry" {
-    for_each = local.prefix_lists.ci-cd-systems.entries
-    content {
-      cidr        = entry.value.cidr
-      description = entry.value.description
-    }
-  }
-
-  tags = merge(local.common_tags, local.prefix_lists.ci-cd-systems.tags, {
-    Name = local.prefix_lists.ci-cd-systems.name
-  })
-}
-
-# Monitoring Services
-resource "aws_ec2_managed_prefix_list" "monitoring_services" {
-  name           = local.prefix_lists.monitoring-services.name
-  address_family = local.prefix_lists.monitoring-services.address_family
-  max_entries    = local.prefix_lists.monitoring-services.max_entries
-
-  dynamic "entry" {
-    for_each = local.prefix_lists.monitoring-services.entries
-    content {
-      cidr        = entry.value.cidr
-      description = entry.value.description
-    }
-  }
-
-  tags = merge(local.common_tags, local.prefix_lists.monitoring-services.tags, {
-    Name = local.prefix_lists.monitoring-services.name
-  })
-}
-
 # RAM sharing for cross-account prefix list access
 resource "aws_ram_resource_share" "prefix_lists" {
   count                     = length(var.share_prefix_lists_with_accounts) > 0 ? 1 : 0
@@ -114,11 +57,8 @@ resource "aws_ram_resource_share" "prefix_lists" {
 
 resource "aws_ram_resource_association" "prefix_lists" {
   for_each = length(var.share_prefix_lists_with_accounts) > 0 ? {
-    corporate_networks  = aws_ec2_managed_prefix_list.corporate_networks.arn
-    waf_saas_providers  = aws_ec2_managed_prefix_list.waf_saas_providers.arn
-    aws_vpc_endpoints   = aws_ec2_managed_prefix_list.aws_vpc_endpoints.arn
-    ci_cd_systems       = aws_ec2_managed_prefix_list.ci_cd_systems.arn
-    monitoring_services = aws_ec2_managed_prefix_list.monitoring_services.arn
+    corporate_networks = aws_ec2_managed_prefix_list.corporate_networks.arn
+    waf_saas_providers = aws_ec2_managed_prefix_list.waf_saas_providers.arn
   } : {}
 
   resource_arn       = each.value
