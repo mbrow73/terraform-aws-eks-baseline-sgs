@@ -419,11 +419,3 @@ resource "aws_vpc_security_group_ingress_rule" "nlb_from_corporate_443" {
   description       = "HTTPS from corporate networks"
 }
 
-resource "aws_vpc_security_group_ingress_rule" "nlb_from_corporate_80" {
-  security_group_id = aws_security_group.intranet_nlb.id
-  prefix_list_id    = var.corporate_networks_pl_id
-  from_port         = 80
-  to_port           = 80
-  ip_protocol       = "tcp"
-  description       = "HTTP from corporate networks (remove if HTTPS-only)"
-}
