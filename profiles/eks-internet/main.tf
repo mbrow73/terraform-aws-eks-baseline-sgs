@@ -202,7 +202,7 @@ resource "aws_vpc_security_group_egress_rule" "cluster_to_workers_15017" {
 # WORKERS - Shared Worker Nodes (serves both istio paths)
 # =======================================================
 
-# --- Ingress ---
+# --- Ingress (control plane) ---
 
 resource "aws_vpc_security_group_ingress_rule" "workers_from_cluster_10250" {
   security_group_id            = aws_security_group.eks_workers.id
@@ -211,82 +211,6 @@ resource "aws_vpc_security_group_ingress_rule" "workers_from_cluster_10250" {
   to_port                      = 10250
   ip_protocol                  = "tcp"
   description                  = "Control plane to kubelet"
-}
-
-resource "aws_vpc_security_group_ingress_rule" "workers_self_10250" {
-  security_group_id            = aws_security_group.eks_workers.id
-  referenced_security_group_id = aws_security_group.eks_workers.id
-  from_port                    = 10250
-  to_port                      = 10250
-  ip_protocol                  = "tcp"
-  description                  = "Istiod pod to local kubelet"
-}
-
-resource "aws_vpc_security_group_ingress_rule" "workers_self_dns_tcp" {
-  security_group_id            = aws_security_group.eks_workers.id
-  referenced_security_group_id = aws_security_group.eks_workers.id
-  from_port                    = 53
-  to_port                      = 53
-  ip_protocol                  = "tcp"
-  description                  = "CoreDNS (TCP)"
-}
-
-resource "aws_vpc_security_group_ingress_rule" "workers_self_dns_udp" {
-  security_group_id            = aws_security_group.eks_workers.id
-  referenced_security_group_id = aws_security_group.eks_workers.id
-  from_port                    = 53
-  to_port                      = 53
-  ip_protocol                  = "udp"
-  description                  = "CoreDNS (UDP)"
-}
-
-resource "aws_vpc_security_group_ingress_rule" "workers_self_15006" {
-  security_group_id            = aws_security_group.eks_workers.id
-  referenced_security_group_id = aws_security_group.eks_workers.id
-  from_port                    = 15006
-  to_port                      = 15006
-  ip_protocol                  = "tcp"
-  description                  = "Envoy sidecar inbound capture (service-to-service)"
-}
-
-# Intranet istio → workers
-resource "aws_vpc_security_group_ingress_rule" "workers_from_istio_intranet_15006" {
-  security_group_id            = aws_security_group.eks_workers.id
-  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
-  from_port                    = 15006
-  to_port                      = 15006
-  ip_protocol                  = "tcp"
-  description                  = "Intranet istio gateway mesh traffic to app pods"
-}
-
-# Internet istio → workers
-resource "aws_vpc_security_group_ingress_rule" "workers_from_istio_inet_15006" {
-  security_group_id            = aws_security_group.eks_workers.id
-  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
-  from_port                    = 15006
-  to_port                      = 15006
-  ip_protocol                  = "tcp"
-  description                  = "Internet istio gateway mesh traffic to app pods"
-}
-
-# Intranet istio → istiod
-resource "aws_vpc_security_group_ingress_rule" "workers_from_istio_intranet_15012" {
-  security_group_id            = aws_security_group.eks_workers.id
-  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
-  from_port                    = 15012
-  to_port                      = 15012
-  ip_protocol                  = "tcp"
-  description                  = "Intranet istio gateway to istiod xDS (mTLS)"
-}
-
-# Internet istio → istiod
-resource "aws_vpc_security_group_ingress_rule" "workers_from_istio_inet_15012" {
-  security_group_id            = aws_security_group.eks_workers.id
-  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
-  from_port                    = 15012
-  to_port                      = 15012
-  ip_protocol                  = "tcp"
-  description                  = "Internet istio gateway to istiod xDS (mTLS)"
 }
 
 resource "aws_vpc_security_group_ingress_rule" "workers_from_cluster_15017" {
@@ -307,7 +231,148 @@ resource "aws_vpc_security_group_ingress_rule" "workers_from_cluster_443" {
   description                  = "Admission webhook callbacks from control plane"
 }
 
-# --- Egress ---
+# --- Ingress (inter-node mesh: self) ---
+
+resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_self_tcp_443" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: HTTPS between workers"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_self_tcp_ephemeral" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: non-privileged TCP from workers"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_self_udp_ephemeral" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: non-privileged UDP from workers"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_self_tcp_dns" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: DNS (TCP) from workers"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_self_udp_dns" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: DNS (UDP) from workers"
+}
+
+# --- Ingress (inter-node mesh: from istio-intranet) ---
+
+resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_istio_intranet_tcp_443" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: HTTPS between istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_istio_intranet_tcp_ephemeral" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: non-privileged TCP from istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_istio_intranet_udp_ephemeral" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: non-privileged UDP from istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_istio_intranet_tcp_dns" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: DNS (TCP) from istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_istio_intranet_udp_dns" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: DNS (UDP) from istio-intranet nodes"
+}
+
+# --- Ingress (inter-node mesh: from istio-inet) ---
+
+resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_istio_inet_tcp_443" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: HTTPS between istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_istio_inet_tcp_ephemeral" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: non-privileged TCP from istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_istio_inet_udp_ephemeral" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: non-privileged UDP from istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_istio_inet_tcp_dns" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: DNS (TCP) from istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_istio_inet_udp_dns" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: DNS (UDP) from istio-inet nodes"
+}
+
+# --- Egress (control plane + infra) ---
 
 resource "aws_vpc_security_group_egress_rule" "workers_to_cluster_443" {
   security_group_id            = aws_security_group.eks_workers.id
@@ -327,33 +392,6 @@ resource "aws_vpc_security_group_egress_rule" "workers_to_vpce_443" {
   description                  = "VPC endpoints (ECR, S3, STS, CloudWatch)"
 }
 
-resource "aws_vpc_security_group_egress_rule" "workers_self_dns_tcp" {
-  security_group_id            = aws_security_group.eks_workers.id
-  referenced_security_group_id = aws_security_group.eks_workers.id
-  from_port                    = 53
-  to_port                      = 53
-  ip_protocol                  = "tcp"
-  description                  = "CoreDNS (TCP)"
-}
-
-resource "aws_vpc_security_group_egress_rule" "workers_self_dns_udp" {
-  security_group_id            = aws_security_group.eks_workers.id
-  referenced_security_group_id = aws_security_group.eks_workers.id
-  from_port                    = 53
-  to_port                      = 53
-  ip_protocol                  = "udp"
-  description                  = "CoreDNS (UDP)"
-}
-
-resource "aws_vpc_security_group_egress_rule" "workers_self_15006" {
-  security_group_id            = aws_security_group.eks_workers.id
-  referenced_security_group_id = aws_security_group.eks_workers.id
-  from_port                    = 15006
-  to_port                      = 15006
-  ip_protocol                  = "tcp"
-  description                  = "Envoy sidecar outbound to other pod sidecars"
-}
-
 # Workers → on-prem addons via TGW
 resource "aws_vpc_security_group_egress_rule" "workers_to_onprem_443" {
   security_group_id = aws_security_group.eks_workers.id
@@ -364,11 +402,152 @@ resource "aws_vpc_security_group_egress_rule" "workers_to_onprem_443" {
   description       = "HTTPS to on-prem services (addons, config) via TGW"
 }
 
+# --- Egress (inter-node mesh: self) ---
+
+resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_self_tcp_443" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: HTTPS between workers"
+}
+
+resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_self_tcp_ephemeral" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: non-privileged TCP from workers"
+}
+
+resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_self_udp_ephemeral" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: non-privileged UDP from workers"
+}
+
+resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_self_tcp_dns" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: DNS (TCP) from workers"
+}
+
+resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_self_udp_dns" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: DNS (UDP) from workers"
+}
+
+# --- Egress (inter-node mesh: to istio-intranet) ---
+
+resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_istio_intranet_tcp_443" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: HTTPS between istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_istio_intranet_tcp_ephemeral" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: non-privileged TCP from istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_istio_intranet_udp_ephemeral" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: non-privileged UDP from istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_istio_intranet_tcp_dns" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: DNS (TCP) from istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_istio_intranet_udp_dns" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: DNS (UDP) from istio-intranet nodes"
+}
+
+# --- Egress (inter-node mesh: to istio-inet) ---
+
+resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_istio_inet_tcp_443" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: HTTPS between istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_istio_inet_tcp_ephemeral" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: non-privileged TCP from istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_istio_inet_udp_ephemeral" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: non-privileged UDP from istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_istio_inet_tcp_dns" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: DNS (TCP) from istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_istio_inet_udp_dns" {
+  security_group_id            = aws_security_group.eks_workers.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: DNS (UDP) from istio-inet nodes"
+}
+
 # =======================================================
 # ISTIO INTRANET NODES - Corporate/On-Prem Path
 # =======================================================
 
-# --- Ingress (from intranet NLB - client IP preserved = corporate PL) ---
+# --- Ingress (from intranet NLB) ---
 
 resource "aws_vpc_security_group_ingress_rule" "istio_intranet_from_nlb_8080" {
   security_group_id            = aws_security_group.istio_intranet_nodes.id
@@ -397,14 +576,7 @@ resource "aws_vpc_security_group_ingress_rule" "istio_intranet_from_nlb_15021" {
   description                  = "Istio health check from NLB"
 }
 
-resource "aws_vpc_security_group_ingress_rule" "istio_intranet_self_15021" {
-  security_group_id            = aws_security_group.istio_intranet_nodes.id
-  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
-  from_port                    = 15021
-  to_port                      = 15021
-  ip_protocol                  = "tcp"
-  description                  = "Kubelet readiness probes"
-}
+# --- Ingress (control plane) ---
 
 resource "aws_vpc_security_group_ingress_rule" "istio_intranet_from_cluster_10250" {
   security_group_id            = aws_security_group.istio_intranet_nodes.id
@@ -424,7 +596,148 @@ resource "aws_vpc_security_group_ingress_rule" "istio_intranet_from_cluster_443"
   description                  = "Webhook callbacks from control plane"
 }
 
-# --- Egress ---
+# --- Ingress (inter-node mesh: self) ---
+
+resource "aws_vpc_security_group_ingress_rule" "istio_intranet_mesh_in_self_tcp_443" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: HTTPS between istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_intranet_mesh_in_self_tcp_ephemeral" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: non-privileged TCP from istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_intranet_mesh_in_self_udp_ephemeral" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: non-privileged UDP from istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_intranet_mesh_in_self_tcp_dns" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: DNS (TCP) from istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_intranet_mesh_in_self_udp_dns" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: DNS (UDP) from istio-intranet nodes"
+}
+
+# --- Ingress (inter-node mesh: from workers) ---
+
+resource "aws_vpc_security_group_ingress_rule" "istio_intranet_mesh_in_workers_tcp_443" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: HTTPS between workers"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_intranet_mesh_in_workers_tcp_ephemeral" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: non-privileged TCP from workers"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_intranet_mesh_in_workers_udp_ephemeral" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: non-privileged UDP from workers"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_intranet_mesh_in_workers_tcp_dns" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: DNS (TCP) from workers"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_intranet_mesh_in_workers_udp_dns" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: DNS (UDP) from workers"
+}
+
+# --- Ingress (inter-node mesh: from istio-inet) ---
+
+resource "aws_vpc_security_group_ingress_rule" "istio_intranet_mesh_in_istio_inet_tcp_443" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: HTTPS between istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_intranet_mesh_in_istio_inet_tcp_ephemeral" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: non-privileged TCP from istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_intranet_mesh_in_istio_inet_udp_ephemeral" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: non-privileged UDP from istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_intranet_mesh_in_istio_inet_tcp_dns" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: DNS (TCP) from istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_intranet_mesh_in_istio_inet_udp_dns" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: DNS (UDP) from istio-inet nodes"
+}
+
+# --- Egress (control plane + infra) ---
 
 resource "aws_vpc_security_group_egress_rule" "istio_intranet_to_cluster_443" {
   security_group_id            = aws_security_group.istio_intranet_nodes.id
@@ -444,46 +757,152 @@ resource "aws_vpc_security_group_egress_rule" "istio_intranet_to_vpce_443" {
   description                  = "VPC endpoints"
 }
 
-resource "aws_vpc_security_group_egress_rule" "istio_intranet_to_workers_15012" {
+# --- Egress (inter-node mesh: self) ---
+
+resource "aws_vpc_security_group_egress_rule" "istio_intranet_mesh_out_self_tcp_443" {
   security_group_id            = aws_security_group.istio_intranet_nodes.id
-  referenced_security_group_id = aws_security_group.eks_workers.id
-  from_port                    = 15012
-  to_port                      = 15012
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 443
+  to_port                      = 443
   ip_protocol                  = "tcp"
-  description                  = "istiod xDS config stream (mTLS)"
+  description                  = "Inter-node mesh: HTTPS between istio-intranet nodes"
 }
 
-resource "aws_vpc_security_group_egress_rule" "istio_intranet_to_workers_15006" {
+resource "aws_vpc_security_group_egress_rule" "istio_intranet_mesh_out_self_tcp_ephemeral" {
   security_group_id            = aws_security_group.istio_intranet_nodes.id
-  referenced_security_group_id = aws_security_group.eks_workers.id
-  from_port                    = 15006
-  to_port                      = 15006
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
   ip_protocol                  = "tcp"
-  description                  = "Mesh traffic to app pod sidecars"
+  description                  = "Inter-node mesh: non-privileged TCP from istio-intranet nodes"
 }
 
-resource "aws_vpc_security_group_egress_rule" "istio_intranet_to_workers_dns_tcp" {
+resource "aws_vpc_security_group_egress_rule" "istio_intranet_mesh_out_self_udp_ephemeral" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: non-privileged UDP from istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "istio_intranet_mesh_out_self_tcp_dns" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: DNS (TCP) from istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "istio_intranet_mesh_out_self_udp_dns" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: DNS (UDP) from istio-intranet nodes"
+}
+
+# --- Egress (inter-node mesh: to workers) ---
+
+resource "aws_vpc_security_group_egress_rule" "istio_intranet_mesh_out_workers_tcp_443" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: HTTPS between workers"
+}
+
+resource "aws_vpc_security_group_egress_rule" "istio_intranet_mesh_out_workers_tcp_ephemeral" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: non-privileged TCP from workers"
+}
+
+resource "aws_vpc_security_group_egress_rule" "istio_intranet_mesh_out_workers_udp_ephemeral" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: non-privileged UDP from workers"
+}
+
+resource "aws_vpc_security_group_egress_rule" "istio_intranet_mesh_out_workers_tcp_dns" {
   security_group_id            = aws_security_group.istio_intranet_nodes.id
   referenced_security_group_id = aws_security_group.eks_workers.id
   from_port                    = 53
   to_port                      = 53
   ip_protocol                  = "tcp"
-  description                  = "DNS resolution (TCP)"
+  description                  = "Inter-node mesh: DNS (TCP) from workers"
 }
 
-resource "aws_vpc_security_group_egress_rule" "istio_intranet_to_workers_dns_udp" {
+resource "aws_vpc_security_group_egress_rule" "istio_intranet_mesh_out_workers_udp_dns" {
   security_group_id            = aws_security_group.istio_intranet_nodes.id
   referenced_security_group_id = aws_security_group.eks_workers.id
   from_port                    = 53
   to_port                      = 53
   ip_protocol                  = "udp"
-  description                  = "DNS resolution (UDP)"
+  description                  = "Inter-node mesh: DNS (UDP) from workers"
+}
+
+# --- Egress (inter-node mesh: to istio-inet) ---
+
+resource "aws_vpc_security_group_egress_rule" "istio_intranet_mesh_out_istio_inet_tcp_443" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: HTTPS between istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "istio_intranet_mesh_out_istio_inet_tcp_ephemeral" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: non-privileged TCP from istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "istio_intranet_mesh_out_istio_inet_udp_ephemeral" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: non-privileged UDP from istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "istio_intranet_mesh_out_istio_inet_tcp_dns" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: DNS (TCP) from istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "istio_intranet_mesh_out_istio_inet_udp_dns" {
+  security_group_id            = aws_security_group.istio_intranet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: DNS (UDP) from istio-inet nodes"
 }
 
 # =======================================================
 # INTRANET NLB - Corporate/On-Prem
-# TODO: Max to fill in additional rules
 # =======================================================
+
+# --- Ingress ---
 
 resource "aws_vpc_security_group_ingress_rule" "intranet_nlb_from_corporate_443" {
   security_group_id = aws_security_group.intranet_nlb.id
@@ -494,6 +913,34 @@ resource "aws_vpc_security_group_ingress_rule" "intranet_nlb_from_corporate_443"
   description       = "HTTPS from corporate networks"
 }
 
+# --- Egress (to istio-intranet nodes) ---
+
+resource "aws_vpc_security_group_egress_rule" "intranet_nlb_to_istio_8080" {
+  security_group_id            = aws_security_group.intranet_nlb.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 8080
+  to_port                      = 8080
+  ip_protocol                  = "tcp"
+  description                  = "HTTP to istio intranet gateway nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "intranet_nlb_to_istio_8443" {
+  security_group_id            = aws_security_group.intranet_nlb.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 8443
+  to_port                      = 8443
+  ip_protocol                  = "tcp"
+  description                  = "HTTPS to istio intranet gateway nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "intranet_nlb_to_istio_15021" {
+  security_group_id            = aws_security_group.intranet_nlb.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 15021
+  to_port                      = 15021
+  ip_protocol                  = "tcp"
+  description                  = "Istio health check to intranet gateway nodes"
+}
 
 # =======================================================
 # ISTIO INTERNET NODES - WAF/Internet Path
@@ -529,14 +976,7 @@ resource "aws_vpc_security_group_ingress_rule" "istio_inet_from_waf_15021" {
   description       = "Istio health check from NLB (WAF source)"
 }
 
-resource "aws_vpc_security_group_ingress_rule" "istio_inet_self_15021" {
-  security_group_id            = aws_security_group.istio_inet_nodes.id
-  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
-  from_port                    = 15021
-  to_port                      = 15021
-  ip_protocol                  = "tcp"
-  description                  = "Kubelet readiness probes"
-}
+# --- Ingress (control plane) ---
 
 resource "aws_vpc_security_group_ingress_rule" "istio_inet_from_cluster_10250" {
   security_group_id            = aws_security_group.istio_inet_nodes.id
@@ -556,7 +996,148 @@ resource "aws_vpc_security_group_ingress_rule" "istio_inet_from_cluster_443" {
   description                  = "Webhook callbacks from control plane"
 }
 
-# --- Egress ---
+# --- Ingress (inter-node mesh: self) ---
+
+resource "aws_vpc_security_group_ingress_rule" "istio_inet_mesh_in_self_tcp_443" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: HTTPS between istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_inet_mesh_in_self_tcp_ephemeral" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: non-privileged TCP from istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_inet_mesh_in_self_udp_ephemeral" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: non-privileged UDP from istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_inet_mesh_in_self_tcp_dns" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: DNS (TCP) from istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_inet_mesh_in_self_udp_dns" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: DNS (UDP) from istio-inet nodes"
+}
+
+# --- Ingress (inter-node mesh: from workers) ---
+
+resource "aws_vpc_security_group_ingress_rule" "istio_inet_mesh_in_workers_tcp_443" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: HTTPS between workers"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_inet_mesh_in_workers_tcp_ephemeral" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: non-privileged TCP from workers"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_inet_mesh_in_workers_udp_ephemeral" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: non-privileged UDP from workers"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_inet_mesh_in_workers_tcp_dns" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: DNS (TCP) from workers"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_inet_mesh_in_workers_udp_dns" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: DNS (UDP) from workers"
+}
+
+# --- Ingress (inter-node mesh: from istio-intranet) ---
+
+resource "aws_vpc_security_group_ingress_rule" "istio_inet_mesh_in_istio_intranet_tcp_443" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: HTTPS between istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_inet_mesh_in_istio_intranet_tcp_ephemeral" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: non-privileged TCP from istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_inet_mesh_in_istio_intranet_udp_ephemeral" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: non-privileged UDP from istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_inet_mesh_in_istio_intranet_tcp_dns" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: DNS (TCP) from istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "istio_inet_mesh_in_istio_intranet_udp_dns" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: DNS (UDP) from istio-intranet nodes"
+}
+
+# --- Egress (control plane + infra) ---
 
 resource "aws_vpc_security_group_egress_rule" "istio_inet_to_cluster_443" {
   security_group_id            = aws_security_group.istio_inet_nodes.id
@@ -576,40 +1157,145 @@ resource "aws_vpc_security_group_egress_rule" "istio_inet_to_vpce_443" {
   description                  = "VPC endpoints"
 }
 
-resource "aws_vpc_security_group_egress_rule" "istio_inet_to_workers_15012" {
+# --- Egress (inter-node mesh: self) ---
+
+resource "aws_vpc_security_group_egress_rule" "istio_inet_mesh_out_self_tcp_443" {
   security_group_id            = aws_security_group.istio_inet_nodes.id
-  referenced_security_group_id = aws_security_group.eks_workers.id
-  from_port                    = 15012
-  to_port                      = 15012
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 443
+  to_port                      = 443
   ip_protocol                  = "tcp"
-  description                  = "istiod xDS config stream (mTLS)"
+  description                  = "Inter-node mesh: HTTPS between istio-inet nodes"
 }
 
-resource "aws_vpc_security_group_egress_rule" "istio_inet_to_workers_15006" {
+resource "aws_vpc_security_group_egress_rule" "istio_inet_mesh_out_self_tcp_ephemeral" {
   security_group_id            = aws_security_group.istio_inet_nodes.id
-  referenced_security_group_id = aws_security_group.eks_workers.id
-  from_port                    = 15006
-  to_port                      = 15006
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
   ip_protocol                  = "tcp"
-  description                  = "Mesh traffic to app pod sidecars"
+  description                  = "Inter-node mesh: non-privileged TCP from istio-inet nodes"
 }
 
-resource "aws_vpc_security_group_egress_rule" "istio_inet_to_workers_dns_tcp" {
+resource "aws_vpc_security_group_egress_rule" "istio_inet_mesh_out_self_udp_ephemeral" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: non-privileged UDP from istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "istio_inet_mesh_out_self_tcp_dns" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: DNS (TCP) from istio-inet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "istio_inet_mesh_out_self_udp_dns" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: DNS (UDP) from istio-inet nodes"
+}
+
+# --- Egress (inter-node mesh: to workers) ---
+
+resource "aws_vpc_security_group_egress_rule" "istio_inet_mesh_out_workers_tcp_443" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: HTTPS between workers"
+}
+
+resource "aws_vpc_security_group_egress_rule" "istio_inet_mesh_out_workers_tcp_ephemeral" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: non-privileged TCP from workers"
+}
+
+resource "aws_vpc_security_group_egress_rule" "istio_inet_mesh_out_workers_udp_ephemeral" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.eks_workers.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: non-privileged UDP from workers"
+}
+
+resource "aws_vpc_security_group_egress_rule" "istio_inet_mesh_out_workers_tcp_dns" {
   security_group_id            = aws_security_group.istio_inet_nodes.id
   referenced_security_group_id = aws_security_group.eks_workers.id
   from_port                    = 53
   to_port                      = 53
   ip_protocol                  = "tcp"
-  description                  = "DNS resolution (TCP)"
+  description                  = "Inter-node mesh: DNS (TCP) from workers"
 }
 
-resource "aws_vpc_security_group_egress_rule" "istio_inet_to_workers_dns_udp" {
+resource "aws_vpc_security_group_egress_rule" "istio_inet_mesh_out_workers_udp_dns" {
   security_group_id            = aws_security_group.istio_inet_nodes.id
   referenced_security_group_id = aws_security_group.eks_workers.id
   from_port                    = 53
   to_port                      = 53
   ip_protocol                  = "udp"
-  description                  = "DNS resolution (UDP)"
+  description                  = "Inter-node mesh: DNS (UDP) from workers"
+}
+
+# --- Egress (inter-node mesh: to istio-intranet) ---
+
+resource "aws_vpc_security_group_egress_rule" "istio_inet_mesh_out_istio_intranet_tcp_443" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: HTTPS between istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "istio_inet_mesh_out_istio_intranet_tcp_ephemeral" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: non-privileged TCP from istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "istio_inet_mesh_out_istio_intranet_udp_ephemeral" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 1024
+  to_port                      = 65535
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: non-privileged UDP from istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "istio_inet_mesh_out_istio_intranet_tcp_dns" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "tcp"
+  description                  = "Inter-node mesh: DNS (TCP) from istio-intranet nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "istio_inet_mesh_out_istio_intranet_udp_dns" {
+  security_group_id            = aws_security_group.istio_inet_nodes.id
+  referenced_security_group_id = aws_security_group.istio_intranet_nodes.id
+  from_port                    = 53
+  to_port                      = 53
+  ip_protocol                  = "udp"
+  description                  = "Inter-node mesh: DNS (UDP) from istio-intranet nodes"
 }
 
 # =======================================================
@@ -617,6 +1303,8 @@ resource "aws_vpc_security_group_egress_rule" "istio_inet_to_workers_dns_udp" {
 # NLB is transparent - this SG is for the NLB ENIs.
 # Client IP preservation ON, so source = WAF NAT IPs.
 # =======================================================
+
+# --- Ingress ---
 
 resource "aws_vpc_security_group_ingress_rule" "internet_nlb_from_waf_443" {
   security_group_id = aws_security_group.internet_nlb.id
@@ -627,3 +1315,31 @@ resource "aws_vpc_security_group_ingress_rule" "internet_nlb_from_waf_443" {
   description       = "HTTPS from WAF NAT IPs"
 }
 
+# --- Egress (to istio-inet nodes) ---
+
+resource "aws_vpc_security_group_egress_rule" "internet_nlb_to_istio_8080" {
+  security_group_id            = aws_security_group.internet_nlb.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 8080
+  to_port                      = 8080
+  ip_protocol                  = "tcp"
+  description                  = "HTTP to istio internet gateway nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "internet_nlb_to_istio_8443" {
+  security_group_id            = aws_security_group.internet_nlb.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 8443
+  to_port                      = 8443
+  ip_protocol                  = "tcp"
+  description                  = "HTTPS to istio internet gateway nodes"
+}
+
+resource "aws_vpc_security_group_egress_rule" "internet_nlb_to_istio_15021" {
+  security_group_id            = aws_security_group.internet_nlb.id
+  referenced_security_group_id = aws_security_group.istio_inet_nodes.id
+  from_port                    = 15021
+  to_port                      = 15021
+  ip_protocol                  = "tcp"
+  description                  = "Istio health check to internet gateway nodes"
+}
