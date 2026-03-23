@@ -12,7 +12,7 @@
 #   6. baseline-internet-nlb         (internet-facing NLB)
 #
 # Traffic flows:
-#   Internet: WAF NAT IPs → IGW → GWLBe → Internet NLB → Istio inet nodes → Workers
+#   Internet: WAF/SaaS providers → IGW → GWLBe → Internet NLB → Istio inet nodes → Workers
 #   Intranet: Corporate PL → Intranet NLB → Istio intranet nodes → Workers
 #   On-prem:  Inet cluster → GWLBe core → TGW → on-prem (routed, no SG needed)
 #
@@ -1030,38 +1030,38 @@ resource "aws_vpc_security_group_egress_rule" "intranet_nlb_to_istio_15021" {
 
 # =======================================================
 # ISTIO INTERNET NODES - WAF/Internet Path
-# Client IP preserved through NLB - source is WAF NAT IPs
+# Client IP preserved through NLB - source is WAF/SaaS providers
 # =======================================================
 
-# --- Ingress (source = WAF NAT IPs, preserved through transparent NLB) ---
+# --- Ingress (source = WAF/SaaS providers, preserved through transparent NLB) ---
 
 resource "aws_vpc_security_group_ingress_rule" "istio_inet_from_waf_8080" {
   security_group_id = aws_security_group.istio_inet_nodes.id
-  prefix_list_id    = var.waf_nat_ips_pl_id
+  prefix_list_id    = var.waf_saas_providers_pl_id
   from_port         = 8080
   to_port           = 8080
   ip_protocol       = "tcp"
-  description       = "HTTP from WAF (client IP preserved through NLB)"
+  description       = "HTTP from WAF/SaaS providers (client IP preserved through NLB)"
   tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "istio_inet_from_waf_8443" {
   security_group_id = aws_security_group.istio_inet_nodes.id
-  prefix_list_id    = var.waf_nat_ips_pl_id
+  prefix_list_id    = var.waf_saas_providers_pl_id
   from_port         = 8443
   to_port           = 8443
   ip_protocol       = "tcp"
-  description       = "HTTPS from WAF (client IP preserved through NLB)"
+  description       = "HTTPS from WAF/SaaS providers (client IP preserved through NLB)"
   tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "istio_inet_from_waf_15021" {
   security_group_id = aws_security_group.istio_inet_nodes.id
-  prefix_list_id    = var.waf_nat_ips_pl_id
+  prefix_list_id    = var.waf_saas_providers_pl_id
   from_port         = 15021
   to_port           = 15021
   ip_protocol       = "tcp"
-  description       = "Istio health check from NLB (WAF source)"
+  description       = "Istio health check from NLB (WAF/SaaS source)"
   tags = var.common_tags
 }
 
@@ -1424,18 +1424,18 @@ resource "aws_vpc_security_group_egress_rule" "istio_inet_mesh_out_istio_intrane
 # =======================================================
 # INTERNET NLB - WAF NAT IP Ingress
 # NLB is transparent - this SG is for the NLB ENIs.
-# Client IP preservation ON, so source = WAF NAT IPs.
+# Client IP preservation ON, so source = WAF/SaaS providers.
 # =======================================================
 
 # --- Ingress ---
 
 resource "aws_vpc_security_group_ingress_rule" "internet_nlb_from_waf_443" {
   security_group_id = aws_security_group.internet_nlb.id
-  prefix_list_id    = var.waf_nat_ips_pl_id
+  prefix_list_id    = var.waf_saas_providers_pl_id
   from_port         = 443
   to_port           = 443
   ip_protocol       = "tcp"
-  description       = "HTTPS from WAF NAT IPs"
+  description       = "HTTPS from WAF/SaaS providers"
   tags = var.common_tags
 }
 
