@@ -87,7 +87,6 @@ resource "aws_vpc_security_group_ingress_rule" "cluster_from_workers_443" {
   to_port                      = 443
   ip_protocol                  = "tcp"
   description                  = "Kubernetes API from worker nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "cluster_from_istio_443" {
@@ -97,7 +96,6 @@ resource "aws_vpc_security_group_ingress_rule" "cluster_from_istio_443" {
   to_port                      = 443
   ip_protocol                  = "tcp"
   description                  = "Kubernetes API from istio gateway nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "cluster_from_corporate_443" {
@@ -107,7 +105,6 @@ resource "aws_vpc_security_group_ingress_rule" "cluster_from_corporate_443" {
   to_port           = 443
   ip_protocol       = "tcp"
   description       = "Kubernetes API from corporate networks (kubectl)"
-  tags = var.common_tags
 }
 
 # --- Egress ---
@@ -119,7 +116,6 @@ resource "aws_vpc_security_group_egress_rule" "cluster_to_workers_10250" {
   to_port                      = 10250
   ip_protocol                  = "tcp"
   description                  = "Kubelet on worker nodes (logs, exec, metrics)"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "cluster_to_istio_10250" {
@@ -129,7 +125,6 @@ resource "aws_vpc_security_group_egress_rule" "cluster_to_istio_10250" {
   to_port                      = 10250
   ip_protocol                  = "tcp"
   description                  = "Kubelet on istio gateway nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "cluster_to_workers_443" {
@@ -139,7 +134,6 @@ resource "aws_vpc_security_group_egress_rule" "cluster_to_workers_443" {
   to_port                      = 443
   ip_protocol                  = "tcp"
   description                  = "Admission webhooks on worker nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "cluster_to_workers_15017" {
@@ -149,7 +143,6 @@ resource "aws_vpc_security_group_egress_rule" "cluster_to_workers_15017" {
   to_port                      = 15017
   ip_protocol                  = "tcp"
   description                  = "Istiod sidecar injection webhook"
-  tags = var.common_tags
 }
 
 # =======================================================
@@ -165,7 +158,6 @@ resource "aws_vpc_security_group_ingress_rule" "workers_from_cluster_10250" {
   to_port                      = 10250
   ip_protocol                  = "tcp"
   description                  = "Control plane to kubelet (logs, exec, metrics)"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "workers_from_cluster_15017" {
@@ -175,7 +167,6 @@ resource "aws_vpc_security_group_ingress_rule" "workers_from_cluster_15017" {
   to_port                      = 15017
   ip_protocol                  = "tcp"
   description                  = "Istiod sidecar injection webhook from control plane"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "workers_from_cluster_443" {
@@ -185,7 +176,6 @@ resource "aws_vpc_security_group_ingress_rule" "workers_from_cluster_443" {
   to_port                      = 443
   ip_protocol                  = "tcp"
   description                  = "Admission webhook callbacks from control plane"
-  tags = var.common_tags
 }
 
 # --- Ingress (inter-node mesh: self) ---
@@ -197,7 +187,6 @@ resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_self_tcp_443" {
   to_port                      = 443
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: HTTPS between workers"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_self_tcp_ephemeral" {
@@ -207,7 +196,6 @@ resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_self_tcp_ephemer
   to_port                      = 65535
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: non-privileged TCP from workers"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_self_udp_ephemeral" {
@@ -217,7 +205,6 @@ resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_self_udp_ephemer
   to_port                      = 65535
   ip_protocol                  = "udp"
   description                  = "Inter-node mesh: non-privileged UDP from workers"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_self_tcp_dns" {
@@ -227,7 +214,6 @@ resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_self_tcp_dns" {
   to_port                      = 53
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: DNS (TCP) from workers"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_self_udp_dns" {
@@ -237,7 +223,6 @@ resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_self_udp_dns" {
   to_port                      = 53
   ip_protocol                  = "udp"
   description                  = "Inter-node mesh: DNS (UDP) from workers"
-  tags = var.common_tags
 }
 
 # --- Ingress (inter-node mesh: from istio) ---
@@ -249,7 +234,6 @@ resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_istio_tcp_443" {
   to_port                      = 443
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: HTTPS between istio nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_istio_tcp_ephemeral" {
@@ -259,7 +243,6 @@ resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_istio_tcp_epheme
   to_port                      = 65535
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: non-privileged TCP from istio nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_istio_udp_ephemeral" {
@@ -269,7 +252,6 @@ resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_istio_udp_epheme
   to_port                      = 65535
   ip_protocol                  = "udp"
   description                  = "Inter-node mesh: non-privileged UDP from istio nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_istio_tcp_dns" {
@@ -279,7 +261,6 @@ resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_istio_tcp_dns" {
   to_port                      = 53
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: DNS (TCP) from istio nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_istio_udp_dns" {
@@ -289,7 +270,6 @@ resource "aws_vpc_security_group_ingress_rule" "workers_mesh_in_istio_udp_dns" {
   to_port                      = 53
   ip_protocol                  = "udp"
   description                  = "Inter-node mesh: DNS (UDP) from istio nodes"
-  tags = var.common_tags
 }
 
 # --- Egress (control plane + infra) ---
@@ -301,7 +281,6 @@ resource "aws_vpc_security_group_egress_rule" "workers_to_cluster_443" {
   to_port                      = 443
   ip_protocol                  = "tcp"
   description                  = "Kubernetes API server"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "workers_to_vpce_443" {
@@ -311,7 +290,6 @@ resource "aws_vpc_security_group_egress_rule" "workers_to_vpce_443" {
   to_port                      = 443
   ip_protocol                  = "tcp"
   description                  = "VPC endpoints (ECR, S3, STS, CloudWatch)"
-  tags = var.common_tags
 }
 
 # Workers → on-prem addons via TGW
@@ -322,7 +300,6 @@ resource "aws_vpc_security_group_egress_rule" "workers_to_onprem_443" {
   to_port           = 443
   ip_protocol       = "tcp"
   description       = "HTTPS to on-prem services (addons, config) via TGW"
-  tags = var.common_tags
 }
 
 # --- Egress (inter-node mesh: self) ---
@@ -334,7 +311,6 @@ resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_self_tcp_443" {
   to_port                      = 443
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: HTTPS between workers"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_self_tcp_ephemeral" {
@@ -344,7 +320,6 @@ resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_self_tcp_ephemer
   to_port                      = 65535
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: non-privileged TCP from workers"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_self_udp_ephemeral" {
@@ -354,7 +329,6 @@ resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_self_udp_ephemer
   to_port                      = 65535
   ip_protocol                  = "udp"
   description                  = "Inter-node mesh: non-privileged UDP from workers"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_self_tcp_dns" {
@@ -364,7 +338,6 @@ resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_self_tcp_dns" {
   to_port                      = 53
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: DNS (TCP) from workers"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_self_udp_dns" {
@@ -374,7 +347,6 @@ resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_self_udp_dns" {
   to_port                      = 53
   ip_protocol                  = "udp"
   description                  = "Inter-node mesh: DNS (UDP) from workers"
-  tags = var.common_tags
 }
 
 # --- Egress (inter-node mesh: to istio) ---
@@ -386,7 +358,6 @@ resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_istio_tcp_443" {
   to_port                      = 443
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: HTTPS between istio nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_istio_tcp_ephemeral" {
@@ -396,7 +367,6 @@ resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_istio_tcp_epheme
   to_port                      = 65535
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: non-privileged TCP from istio nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_istio_udp_ephemeral" {
@@ -406,7 +376,6 @@ resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_istio_udp_epheme
   to_port                      = 65535
   ip_protocol                  = "udp"
   description                  = "Inter-node mesh: non-privileged UDP from istio nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_istio_tcp_dns" {
@@ -416,7 +385,6 @@ resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_istio_tcp_dns" {
   to_port                      = 53
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: DNS (TCP) from istio nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_istio_udp_dns" {
@@ -426,7 +394,6 @@ resource "aws_vpc_security_group_egress_rule" "workers_mesh_out_istio_udp_dns" {
   to_port                      = 53
   ip_protocol                  = "udp"
   description                  = "Inter-node mesh: DNS (UDP) from istio nodes"
-  tags = var.common_tags
 }
 
 # =======================================================
@@ -442,7 +409,6 @@ resource "aws_vpc_security_group_ingress_rule" "istio_from_nlb_8080" {
   to_port                      = 8080
   ip_protocol                  = "tcp"
   description                  = "HTTP from intranet NLB"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "istio_from_nlb_8443" {
@@ -452,7 +418,6 @@ resource "aws_vpc_security_group_ingress_rule" "istio_from_nlb_8443" {
   to_port                      = 8443
   ip_protocol                  = "tcp"
   description                  = "HTTPS from intranet NLB"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "istio_from_nlb_15021" {
@@ -462,7 +427,6 @@ resource "aws_vpc_security_group_ingress_rule" "istio_from_nlb_15021" {
   to_port                      = 15021
   ip_protocol                  = "tcp"
   description                  = "Istio health check from NLB"
-  tags = var.common_tags
 }
 
 # --- Ingress (control plane) ---
@@ -474,7 +438,6 @@ resource "aws_vpc_security_group_ingress_rule" "istio_from_cluster_10250" {
   to_port                      = 10250
   ip_protocol                  = "tcp"
   description                  = "Control plane to kubelet"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "istio_from_cluster_443" {
@@ -484,7 +447,6 @@ resource "aws_vpc_security_group_ingress_rule" "istio_from_cluster_443" {
   to_port                      = 443
   ip_protocol                  = "tcp"
   description                  = "Webhook callbacks from control plane"
-  tags = var.common_tags
 }
 
 # --- Ingress (inter-node mesh: self) ---
@@ -496,7 +458,6 @@ resource "aws_vpc_security_group_ingress_rule" "istio_mesh_in_self_tcp_443" {
   to_port                      = 443
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: HTTPS between istio nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "istio_mesh_in_self_tcp_ephemeral" {
@@ -506,7 +467,6 @@ resource "aws_vpc_security_group_ingress_rule" "istio_mesh_in_self_tcp_ephemeral
   to_port                      = 65535
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: non-privileged TCP from istio nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "istio_mesh_in_self_udp_ephemeral" {
@@ -516,7 +476,6 @@ resource "aws_vpc_security_group_ingress_rule" "istio_mesh_in_self_udp_ephemeral
   to_port                      = 65535
   ip_protocol                  = "udp"
   description                  = "Inter-node mesh: non-privileged UDP from istio nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "istio_mesh_in_self_tcp_dns" {
@@ -526,7 +485,6 @@ resource "aws_vpc_security_group_ingress_rule" "istio_mesh_in_self_tcp_dns" {
   to_port                      = 53
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: DNS (TCP) from istio nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "istio_mesh_in_self_udp_dns" {
@@ -536,7 +494,6 @@ resource "aws_vpc_security_group_ingress_rule" "istio_mesh_in_self_udp_dns" {
   to_port                      = 53
   ip_protocol                  = "udp"
   description                  = "Inter-node mesh: DNS (UDP) from istio nodes"
-  tags = var.common_tags
 }
 
 # --- Ingress (inter-node mesh: from workers) ---
@@ -548,7 +505,6 @@ resource "aws_vpc_security_group_ingress_rule" "istio_mesh_in_workers_tcp_443" {
   to_port                      = 443
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: HTTPS between workers"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "istio_mesh_in_workers_tcp_ephemeral" {
@@ -558,7 +514,6 @@ resource "aws_vpc_security_group_ingress_rule" "istio_mesh_in_workers_tcp_epheme
   to_port                      = 65535
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: non-privileged TCP from workers"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "istio_mesh_in_workers_udp_ephemeral" {
@@ -568,7 +523,6 @@ resource "aws_vpc_security_group_ingress_rule" "istio_mesh_in_workers_udp_epheme
   to_port                      = 65535
   ip_protocol                  = "udp"
   description                  = "Inter-node mesh: non-privileged UDP from workers"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "istio_mesh_in_workers_tcp_dns" {
@@ -578,7 +532,6 @@ resource "aws_vpc_security_group_ingress_rule" "istio_mesh_in_workers_tcp_dns" {
   to_port                      = 53
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: DNS (TCP) from workers"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "istio_mesh_in_workers_udp_dns" {
@@ -588,7 +541,6 @@ resource "aws_vpc_security_group_ingress_rule" "istio_mesh_in_workers_udp_dns" {
   to_port                      = 53
   ip_protocol                  = "udp"
   description                  = "Inter-node mesh: DNS (UDP) from workers"
-  tags = var.common_tags
 }
 
 # --- Egress (control plane + infra) ---
@@ -600,7 +552,6 @@ resource "aws_vpc_security_group_egress_rule" "istio_to_cluster_443" {
   to_port                      = 443
   ip_protocol                  = "tcp"
   description                  = "Kubernetes API server"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "istio_to_vpce_443" {
@@ -610,7 +561,6 @@ resource "aws_vpc_security_group_egress_rule" "istio_to_vpce_443" {
   to_port                      = 443
   ip_protocol                  = "tcp"
   description                  = "VPC endpoints (ECR, S3, STS, CloudWatch)"
-  tags = var.common_tags
 }
 
 # --- Egress (inter-node mesh: self) ---
@@ -622,7 +572,6 @@ resource "aws_vpc_security_group_egress_rule" "istio_mesh_out_self_tcp_443" {
   to_port                      = 443
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: HTTPS between istio nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "istio_mesh_out_self_tcp_ephemeral" {
@@ -632,7 +581,6 @@ resource "aws_vpc_security_group_egress_rule" "istio_mesh_out_self_tcp_ephemeral
   to_port                      = 65535
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: non-privileged TCP from istio nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "istio_mesh_out_self_udp_ephemeral" {
@@ -642,7 +590,6 @@ resource "aws_vpc_security_group_egress_rule" "istio_mesh_out_self_udp_ephemeral
   to_port                      = 65535
   ip_protocol                  = "udp"
   description                  = "Inter-node mesh: non-privileged UDP from istio nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "istio_mesh_out_self_tcp_dns" {
@@ -652,7 +599,6 @@ resource "aws_vpc_security_group_egress_rule" "istio_mesh_out_self_tcp_dns" {
   to_port                      = 53
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: DNS (TCP) from istio nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "istio_mesh_out_self_udp_dns" {
@@ -662,7 +608,6 @@ resource "aws_vpc_security_group_egress_rule" "istio_mesh_out_self_udp_dns" {
   to_port                      = 53
   ip_protocol                  = "udp"
   description                  = "Inter-node mesh: DNS (UDP) from istio nodes"
-  tags = var.common_tags
 }
 
 # --- Egress (inter-node mesh: to workers) ---
@@ -674,7 +619,6 @@ resource "aws_vpc_security_group_egress_rule" "istio_mesh_out_workers_tcp_443" {
   to_port                      = 443
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: HTTPS between workers"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "istio_mesh_out_workers_tcp_ephemeral" {
@@ -684,7 +628,6 @@ resource "aws_vpc_security_group_egress_rule" "istio_mesh_out_workers_tcp_epheme
   to_port                      = 65535
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: non-privileged TCP from workers"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "istio_mesh_out_workers_udp_ephemeral" {
@@ -694,7 +637,6 @@ resource "aws_vpc_security_group_egress_rule" "istio_mesh_out_workers_udp_epheme
   to_port                      = 65535
   ip_protocol                  = "udp"
   description                  = "Inter-node mesh: non-privileged UDP from workers"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "istio_mesh_out_workers_tcp_dns" {
@@ -704,7 +646,6 @@ resource "aws_vpc_security_group_egress_rule" "istio_mesh_out_workers_tcp_dns" {
   to_port                      = 53
   ip_protocol                  = "tcp"
   description                  = "Inter-node mesh: DNS (TCP) from workers"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "istio_mesh_out_workers_udp_dns" {
@@ -714,7 +655,6 @@ resource "aws_vpc_security_group_egress_rule" "istio_mesh_out_workers_udp_dns" {
   to_port                      = 53
   ip_protocol                  = "udp"
   description                  = "Inter-node mesh: DNS (UDP) from workers"
-  tags = var.common_tags
 }
 
 # =======================================================
@@ -730,7 +670,6 @@ resource "aws_vpc_security_group_ingress_rule" "nlb_from_corporate_443" {
   to_port           = 443
   ip_protocol       = "tcp"
   description       = "HTTPS from corporate networks"
-  tags = var.common_tags
 }
 
 # --- Egress (to istio nodes) ---
@@ -742,7 +681,6 @@ resource "aws_vpc_security_group_egress_rule" "nlb_to_istio_8080" {
   to_port                      = 8080
   ip_protocol                  = "tcp"
   description                  = "HTTP to istio gateway nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "nlb_to_istio_8443" {
@@ -752,7 +690,6 @@ resource "aws_vpc_security_group_egress_rule" "nlb_to_istio_8443" {
   to_port                      = 8443
   ip_protocol                  = "tcp"
   description                  = "HTTPS to istio gateway nodes"
-  tags = var.common_tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "nlb_to_istio_15021" {
@@ -762,5 +699,4 @@ resource "aws_vpc_security_group_egress_rule" "nlb_to_istio_15021" {
   to_port                      = 15021
   ip_protocol                  = "tcp"
   description                  = "Istio health check to gateway nodes"
-  tags = var.common_tags
 }

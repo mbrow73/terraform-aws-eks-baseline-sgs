@@ -42,6 +42,5 @@ resource "aws_vpc_security_group_ingress_rule" "vpce_https" {
   to_port           = 443
   ip_protocol       = "tcp"
   description       = "HTTPS from VPC CIDR ${each.value} to interface endpoints"
-  tags = var.common_tags
 }
 
