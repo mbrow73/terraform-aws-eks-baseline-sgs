@@ -20,8 +20,8 @@ variable "corporate_networks_pl_id" {
   type        = string
 }
 
-variable "waf_nat_ips_pl_id" {
-  description = "ID of the waf-nat-ips managed prefix list"
+variable "waf_saas_providers_pl_id" {
+  description = "ID of the waf-saas-providers managed prefix list"
   type        = string
 }
 
